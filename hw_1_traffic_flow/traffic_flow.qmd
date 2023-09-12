@@ -1,0 +1,69 @@
+---
+title: "Homework: Traffic Flow"
+subtitle: "2.4, 2.7, 3.1"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format:
+  pdf:
+    mainfont: Baskerville
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+
+hm <- function(vec){
+  n <- length(vec)
+  hm <- n / sum(1/vec)
+  hm
+}
+```
+
+
+# 2.4
+
+```{r}
+#| label: setup2-4
+
+time <- 2 #minutes
+speeds <- c(30, 45, 20, 36, 40) #kph
+n = length(speeds)
+```
+
+Over the course of `r time` minutes, `r n` vehicles passed a point with speeds of `r speeds[1:(n-1)]` and `r speeds[n]` km/h.
+The flow $q$ is given by $q = N/T$, where $N$ is the number of vehicles and $T$ the total time.
+Therefore, the flow is $q = `r n`/`r time` = `r n/time`$ vehicles per minute or $q = `r n`/`r time` * 60 = `r n/time*60`$ vehicles per hour. 
+The time-mean speed $v_t$ is the arithmetic mean of the spot speeds, or $v_t = `r mean(speeds) %>% round(2)`$ km/h.
+The space-mean speed $v_s$ is the harmonic mean of the spot speeds, or $v_s = `r hm(speeds) %>% round(2)`$ km/h.
+The time-mean speed is greater.
+
+# 2.7
+
+```{r}
+#| label: setup2-7
+
+lloop <- 6 #feet
+lcar <- 15 #feet
+ttime <- 10 #sec
+
+loop <- tibble(
+  on_sec = c(0,1,2,4,5,6,7,7,8),
+  on_60 = c(0,32,32,22,6,9,4,57,43),
+  off_sec = c(0,1,2,4,5,6,7,8,8),
+  off_60 = c(12,45,45,35,19,22,19,9,53),
+  on_time = on_sec + on_60/60,
+  off_time = off_sec + off_60/60) %>% 
+  transmute(
+    veh_num = 1:nrow(.),
+    on_time,
+    off_time,
+    time = off_time - on_time)
+```
+
+@fig-loop-detector shows the output of a `r lloop`-foot long loop detector.
