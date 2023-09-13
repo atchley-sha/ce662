@@ -7,9 +7,7 @@ date-format: "D MMMM YYYY"
 number-sections: false
 execute: 
   echo: false
-format:
-  pdf:
-    mainfont: Baskerville
+format: pdf
 ---
 
 ```{r}
@@ -17,6 +15,7 @@ format:
 #| include: false
 
 library(tidyverse)
+library(flextable)
 
 hm <- function(vec){
   n <- length(vec)
@@ -64,6 +63,78 @@ loop <- tibble(
     on_time,
     off_time,
     time = off_time - on_time)
+
+ncar <- nrow(loop)
+otime <- sum(loop$time)
 ```
 
 @fig-loop-detector shows the output of a `r lloop`-foot long loop detector.
+The $x$-axis indicates seconds, and the numbers above each bump indicate the on and off times in 1/60 of a second (e.g. `32–45` indicates that the detector turned on at $32/60$ seconds and off at $45/60$ seconds).
+
+```{r}
+#| label: fig-loop-detector
+#| fig-cap: Loop detector on/off data.
+
+knitr::include_graphics("images/2-7_loop_detector.png")
+```
+
+(a) There were `r ncar` vehicles over the `r ttime`-second observation window, so the hourly flow rate is $`r ncar`/`r ttime` * 3600 = `r (ncar/ttime*3600) %>% round()`$ vehicles per hour.
+
+(b) Occupancy is defined as the ratio of detector "on" time to the total observation time: $o = \frac{\sum_{i=1}^N{(\xi_i = t_i^\text{OFF}-t_i^\text{ON})}}{T}$.
+@tbl-vehicle-times gives the on and off times of each vehicle (converted to seconds), and the total time each vehicle triggered the detector.
+From this, the occupancy is determined to be $\frac{\sum{\xi_i} = `r otime %>% round(2)`}{T = 10} = `r (otime/10) %>% round(3)`$
+
+```{r}
+#| label: tbl-vehicle-times
+#| tbl-cap: Vehicle Detector Times
+
+loop %>%
+  round(2) %>%
+  flextable() %>%
+  set_header_labels(
+    veh_num = "Vehicle\nNumber",
+    on_time = "Detector\nOn Time (s)",
+    off_time = "Detector\nOff Time (s)",
+    time = "Activated\nTime (s)") %>%
+  autofit() %>% 
+  align(align = "c", part = "a")
+```
+
+```{r}
+speeds <- loop %>% 
+  transmute(
+    veh_num,
+    time,
+    loop_length = lloop,
+    car_length = lcar,
+    speed = (loop_length + car_length) / time * 3600/5280 #ft/s to mph
+  )
+
+tms <- mean(speeds$speed)
+sms <- hm(speeds$speed)
+```
+
+(c) The speed is given by the length of the detector and vehicle divided by the time the detector was active, i.e. $\dot x = \frac{l_{car} + l_{loop}}{\xi}$.
+@tbl-speeds shows this information.
+From here, $v_t$ and $v_s$ are calculated as before, so $v_t = tms %>% round(2)$ and $v_s = sms %>% round(2)$
+
+```{r}
+#| label: tbl-speeds
+#| tbl-cap: speeds
+
+speeds %>% 
+  round(2) %>% 
+  flextable() %>% 
+  set_header_labels(
+    veh_num = "Vehicle\nNumber",
+    time = "Activated\nTime (s)",
+    loop_length = "Detector\nLength (ft)",
+    car_length = "Vehicle\nLength (ft)",
+    speed = "Vehicle\nSpeed (mph)"
+  ) %>%
+  colformat_double(j = "speed", digits = 1) %>% 
+  autofit() %>% 
+  align(align = "c", part = "a")
+```
+
+
