@@ -15,7 +15,7 @@ format: pdf
 #| include: false
 
 library(tidyverse)
-library(flextable)
+library(kableExtra)
 
 hm <- function(vec){
   n <- length(vec)
@@ -66,6 +66,7 @@ loop <- tibble(
 
 ncar <- nrow(loop)
 otime <- sum(loop$time)
+q <- ncar/ttime*3600 #vph
 ```
 
 @fig-loop-detector shows the output of a `r lloop`-foot long loop detector.
@@ -78,7 +79,7 @@ The $x$-axis indicates seconds, and the numbers above each bump indicate the on 
 knitr::include_graphics("images/2-7_loop_detector.png")
 ```
 
-(a) There were `r ncar` vehicles over the `r ttime`-second observation window, so the hourly flow rate is $`r ncar`/`r ttime` * 3600 = `r (ncar/ttime*3600) %>% round()`$ vehicles per hour.
+(a) There were `r ncar` vehicles over the `r ttime`-second observation window, so the hourly flow rate is $`r ncar`/`r ttime` * 3600 = `r q %>% round()`$ vehicles per hour.
 
 (b) Occupancy is defined as the ratio of detector "on" time to the total observation time: $o = \frac{\sum_{i=1}^N{(\xi_i = t_i^\text{OFF}-t_i^\text{ON})}}{T}$.
 @tbl-vehicle-times gives the on and off times of each vehicle (converted to seconds), and the total time each vehicle triggered the detector.
@@ -89,15 +90,25 @@ From this, the occupancy is determined to be $\frac{\sum{\xi_i} = `r otime %>% r
 #| tbl-cap: Vehicle Detector Times
 
 loop %>%
-  round(2) %>%
-  flextable() %>%
-  set_header_labels(
-    veh_num = "Vehicle\nNumber",
-    on_time = "Detector\nOn Time (s)",
-    off_time = "Detector\nOff Time (s)",
-    time = "Activated\nTime (s)") %>%
-  autofit() %>% 
-  align(align = "c", part = "a")
+  kbl(
+    booktabs = TRUE,
+    digits = c(0,2,2,2),
+    col.names = c(
+      "Vehicle Number",
+      "Detector\nOn Time (s)",
+      "Detector\nOff Time (s)",
+      "Total Activated\nTime")) %>% 
+  kable_styling()
+  
+  # round(2) %>%
+  # flextable() %>%
+  # set_header_labels(
+  #   veh_num = "Vehicle\nNumber",
+  #   on_time = "Detector\nOn Time (s)",
+  #   off_time = "Detector\nOff Time (s)",
+  #   time = "Activated\nTime (s)") %>%
+  # autofit() %>% 
+  # align(align = "c", part = "a")
 ```
 
 ```{r}
@@ -112,29 +123,68 @@ speeds <- loop %>%
 
 tms <- mean(speeds$speed)
 sms <- hm(speeds$speed)
+k <- q/sms #veh/mi
 ```
 
 (c) The speed is given by the length of the detector and vehicle divided by the time the detector was active, i.e. $\dot x = \frac{l_{car} + l_{loop}}{\xi}$.
 @tbl-speeds shows this information.
-From here, $v_t$ and $v_s$ are calculated as before, so $v_t = tms %>% round(2)$ and $v_s = sms %>% round(2)$
+From here, $v_t$ and $v_s$ are calculated as before, so $v_t = `r tms %>% round(2)`$ mph and $v_s = `r sms %>% round(2)`$ mph.
 
 ```{r}
-#| label: tbl-speeds
-#| tbl-cap: speeds
+## | label: tbl-speeds
+## | tbl-cap: speeds
 
-speeds %>% 
-  round(2) %>% 
-  flextable() %>% 
-  set_header_labels(
-    veh_num = "Vehicle\nNumber",
-    time = "Activated\nTime (s)",
-    loop_length = "Detector\nLength (ft)",
-    car_length = "Vehicle\nLength (ft)",
-    speed = "Vehicle\nSpeed (mph)"
-  ) %>%
-  colformat_double(j = "speed", digits = 1) %>% 
-  autofit() %>% 
-  align(align = "c", part = "a")
+# speeds %>% 
+#   round(2) %>% 
+#   flextable() %>% 
+#   set_header_labels(
+#     veh_num = "Vehicle\nNumber",
+#     time = "Activated\nTime (s)",
+#     loop_length = "Detector\nLength (ft)",
+#     car_length = "Vehicle\nLength (ft)",
+#     speed = "Vehicle\nSpeed (mph)"
+#   ) %>%
+#   colformat_double(j = "speed", digits = 1) %>% 
+#   autofit() %>% 
+#   align(align = "c", part = "a")
 ```
 
+(d) The relationship between density ($k$), flow ($q$), and speed ($v$) is given by definition as $q = k\times v_s$.
+This requires, however, an accurate $v_s$, which from point data such as this detector requires an assumption about vehicle length.
+We were given a uniform vehicle length of `r lcar` feet, so this relationship will hold.
+The density is therefore $k = q/v_s = `r q %>% round()`/`r sms %>% round(2)` = `r k %>% round(2)`$ vehicles per mile.
+
+(e) Estimating the speed from the $q = k \times v_s$ relationship will give an average speed of `r sms %>% round(2)` mph.
+This is consistent with the space-mean-speed, since that is the speed used in part (d) (and the speed used in the relationship equation above).
+
+# 3.1
+
+```{r}
+t0 <- 5 #s
+tf <- 15 #s
+x0 <- 0.2 #km
+xf <- 0.5 #km
+```
+
+@fig-time-space shows a time-space diagram for several vehicles.
+The shaded area shows an area of interest, bounded by $t=`r t0`$s and $t=`r tf`$s, and $x=`r x0`$km and $x=`r xf`$km.
+
+(a) Denoting the vehicle whose path most closely intersects the origin as $i$, the vehicle in front of $i$ as $i+1$, and the vehicle behind $i$ as $i-1$, the vehicles that traverse the bounding box are $i+5$ through $i-4$, inclusive.
+
+(b) @tbl-bbox-vehicles shows the time and location that each vehicle enters and exits the bounding box.
+
+```{r}
+#| label: tbl-bbox-vehicles
+#| tbl-cap: Vehicle Entry and Exit of Bounding Box
+
+bbox <- tribble(
+  ~v, ~xin, ~xout, ~tin, ~tout,
+  "i+5", .49, .5, 5, 5.8,
+  "i+4", .45, .5, 5, 6.75,
+  "i+3", .39, .5, 5, 8.5,
+  "i+2", .325, .5, 5, 10.8,
+  "i+1", .27, .49, 5, 15
+)
+
+```
 
