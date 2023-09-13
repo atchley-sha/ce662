@@ -15,7 +15,8 @@ format: pdf
 #| include: false
 
 library(tidyverse)
-library(kableExtra)
+library(flextable)
+require(equatags)
 
 hm <- function(vec){
   n <- length(vec)
@@ -37,10 +38,12 @@ n = length(speeds)
 
 Over the course of `r time` minutes, `r n` vehicles passed a point with speeds of `r speeds[1:(n-1)]` and `r speeds[n]` km/h.
 The flow $q$ is given by $q = N/T$, where $N$ is the number of vehicles and $T$ the total time.
-Therefore, the flow is $q = `r n`/`r time` = `r n/time`$ vehicles per minute or $q = `r n`/`r time` * 60 = `r n/time*60`$ vehicles per hour. 
-The time-mean speed $v_t$ is the arithmetic mean of the spot speeds, or $v_t = `r mean(speeds) %>% round(2)`$ km/h.
-The space-mean speed $v_s$ is the harmonic mean of the spot speeds, or $v_s = `r hm(speeds) %>% round(2)`$ km/h.
+Therefore, the flow is $q = `r n`/`r time` = `r n/time`$ vehicles per minute or $q = `r n`/`r time` \times 60 = `r n/time*60`$ vehicles per hour. 
+The time-mean speed $v_t$ is the arithmetic mean of the spot speeds, or $v_t = `r mean(speeds) %>% round(1)`$ km/h.
+The space-mean speed $v_s$ is the harmonic mean of the spot speeds, or $v_s = `r hm(speeds) %>% round(1)`$ km/h.
 The time-mean speed is greater.
+
+\newpage
 
 # 2.7
 
@@ -79,7 +82,7 @@ The $x$-axis indicates seconds, and the numbers above each bump indicate the on 
 knitr::include_graphics("images/2-7_loop_detector.png")
 ```
 
-(a) There were `r ncar` vehicles over the `r ttime`-second observation window, so the hourly flow rate is $`r ncar`/`r ttime` * 3600 = `r q %>% round()`$ vehicles per hour.
+(a) There were `r ncar` vehicles over the `r ttime`-second observation window, so the hourly flow rate is $`r ncar`/`r ttime` \times 3600 = `r q %>% round()`$ vehicles per hour.
 
 (b) Occupancy is defined as the ratio of detector "on" time to the total observation time: $o = \frac{\sum_{i=1}^N{(\xi_i = t_i^\text{OFF}-t_i^\text{ON})}}{T}$.
 @tbl-vehicle-times gives the on and off times of each vehicle (converted to seconds), and the total time each vehicle triggered the detector.
@@ -90,26 +93,18 @@ From this, the occupancy is determined to be $\frac{\sum{\xi_i} = `r otime %>% r
 #| tbl-cap: Vehicle Detector Times
 
 loop %>%
-  kbl(
-    booktabs = TRUE,
-    digits = c(0,2,2,2),
-    col.names = c(
-      "Vehicle Number",
-      "Detector\nOn Time (s)",
-      "Detector\nOff Time (s)",
-      "Total Activated\nTime")) %>% 
-  kable_styling()
-  
-  # round(2) %>%
-  # flextable() %>%
-  # set_header_labels(
-  #   veh_num = "Vehicle\nNumber",
-  #   on_time = "Detector\nOn Time (s)",
-  #   off_time = "Detector\nOff Time (s)",
-  #   time = "Activated\nTime (s)") %>%
-  # autofit() %>% 
-  # align(align = "c", part = "a")
+  round(2) %>%
+  flextable() %>%
+  set_header_labels(
+    veh_num = "Vehicle\nNumber",
+    on_time = "Detector\nOn Time (s)",
+    off_time = "Detector\nOff Time (s)",
+    time = "Activated\nTime (s)") %>%
+  autofit() %>%
+  align(align = "c", part = "a")
 ```
+
+\newpage
 
 ```{r}
 speeds <- loop %>% 
@@ -131,31 +126,33 @@ k <- q/sms #veh/mi
 From here, $v_t$ and $v_s$ are calculated as before, so $v_t = `r tms %>% round(2)`$ mph and $v_s = `r sms %>% round(2)`$ mph.
 
 ```{r}
-## | label: tbl-speeds
-## | tbl-cap: speeds
+#| label: tbl-speeds
+#| tbl-cap: Vehicle Speeds
 
-# speeds %>% 
-#   round(2) %>% 
-#   flextable() %>% 
-#   set_header_labels(
-#     veh_num = "Vehicle\nNumber",
-#     time = "Activated\nTime (s)",
-#     loop_length = "Detector\nLength (ft)",
-#     car_length = "Vehicle\nLength (ft)",
-#     speed = "Vehicle\nSpeed (mph)"
-#   ) %>%
-#   colformat_double(j = "speed", digits = 1) %>% 
-#   autofit() %>% 
-#   align(align = "c", part = "a")
+speeds %>%
+  round(2) %>%
+  flextable() %>%
+  set_header_labels(
+    veh_num = "Vehicle\nNumber",
+    time = "Activated\nTime (s)",
+    loop_length = "Detector\nLength (ft)",
+    car_length = "Vehicle\nLength (ft)",
+    speed = "Vehicle\nSpeed (mph)"
+  ) %>%
+  colformat_double(j = "speed", digits = 1) %>%
+  autofit() %>%
+  align(align = "c", part = "a")
 ```
 
 (d) The relationship between density ($k$), flow ($q$), and speed ($v$) is given by definition as $q = k\times v_s$.
 This requires, however, an accurate $v_s$, which from point data such as this detector requires an assumption about vehicle length.
 We were given a uniform vehicle length of `r lcar` feet, so this relationship will hold.
-The density is therefore $k = q/v_s = `r q %>% round()`/`r sms %>% round(2)` = `r k %>% round(2)`$ vehicles per mile.
+The density is therefore $k = q/v_s = `r q %>% round()`/`r sms %>% round(2)` = `r k %>% round(1)`$ vehicles per mile.
 
-(e) Estimating the speed from the $q = k \times v_s$ relationship will give an average speed of `r sms %>% round(2)` mph.
+(e) Estimating the speed from the $q = k \times v_s$ relationship will give an average speed of `r sms %>% round(1)` mph.
 This is consistent with the space-mean-speed, since that is the speed used in part (d) (and the speed used in the relationship equation above).
+
+\newpage
 
 # 3.1
 
@@ -164,27 +161,126 @@ t0 <- 5 #s
 tf <- 15 #s
 x0 <- 0.2 #km
 xf <- 0.5 #km
+
+area <- (tf-t0)*(xf-x0) #km*s
 ```
 
 @fig-time-space shows a time-space diagram for several vehicles.
-The shaded area shows an area of interest, bounded by $t=`r t0`$s and $t=`r tf`$s, and $x=`r x0`$km and $x=`r xf`$km.
-
-(a) Denoting the vehicle whose path most closely intersects the origin as $i$, the vehicle in front of $i$ as $i+1$, and the vehicle behind $i$ as $i-1$, the vehicles that traverse the bounding box are $i+5$ through $i-4$, inclusive.
-
-(b) @tbl-bbox-vehicles shows the time and location that each vehicle enters and exits the bounding box.
+The shaded area is of interest, bounded by $t=`r t0`$s and $t=`r tf`$s, and $x=`r x0`$km and $x=`r xf`$km.
 
 ```{r}
-#| label: tbl-bbox-vehicles
-#| tbl-cap: Vehicle Entry and Exit of Bounding Box
+#| label: fig-time-space
+#| fig-cap: Time-space diagram showing bounding box of interest.
 
+knitr::include_graphics("images/3-1_time_space.png")
+```
+
+```{r}
 bbox <- tribble(
   ~v, ~xin, ~xout, ~tin, ~tout,
   "i+5", .49, .5, 5, 5.8,
   "i+4", .45, .5, 5, 6.75,
   "i+3", .39, .5, 5, 8.5,
   "i+2", .325, .5, 5, 10.8,
-  "i+1", .27, .49, 5, 15
-)
+  "i+1", .26, .49, 5, 15,
+  "i", .225, .45, 5, 15,
+  "i-1", .2, .375, 5.5, 15,
+  "i-2", .2, .33, 6.5, 15,
+  "i-3", .2, .31, 10.1, 15,
+  "i-4", .2, .24, 13, 15
+) %>% 
+  mutate(
+    xtot = xout - xin,
+    ttot = tout - tin,
+    speed = xtot/ttot*3600 #km/h
+  ) %>% 
+  relocate(v, xin, xout, xtot, tin, tout, ttot, speed)
 
+speeds <- bbox$speed
+times <- bbox$ttot
+dists <- bbox$xtot
 ```
 
+(a) Denoting the vehicle whose path most closely intersects the origin $(t=0,x=0)$ as $i$, the vehicle in front of $i$ as $i+1$, and the vehicle behind $i$ as $i-1$, the vehicles that traverse the bounding box are $i+5$ through $i-4$, inclusive.
+
+(b,c,d,e) @tbl-bbox-vehicles shows the time and location that each vehicle enters and exits the bounding box, as well as the total distance and duration each vehicle traveled in the bounding box.
+This table also contains each vehicle's average speed while in the bounding box, given as the total distance each vehicle travels in the bounding box divided by the time each vehicle is in the box.
+The (arithmetic) mean speed of these vehicles is `r mean(speeds) %>% round(1)` km/h.
+
+(f) Using the generalized definitions $q = \text d(A)/|A|$, $k = \text t(A)/|A|$, and $v_s = \text d(A)/\text t(A)$, where $\text d(A)$ and $\text t(A)$ are the total distance and time (respectively) traveled by vehicles in the bounding box $A$, and $|A|$ is the area of $A$ (in this case $(`r tf` - `r t0`)\times(`r xf` - `r x0`) = `r area`$ km$\times$s), we get the following:
+
+```{r}
+vph <- sum(dists)/area*3600
+vpkm <- sum(times)/area
+kph <- sum(dists)/sum(times)*3600
+```
+
+
+$$
+q = \frac{`r sum(dists) %>% round(2)`\ \text{veh}\times\text{km}}{`r area`\ \text{km}\times\text{s}}
+\times 3600\ \frac{\text{sec}}{\text{hr}} = 
+`r vph %>% round()`\ \text{vph},
+$$
+$$
+k = \frac{`r sum(times) %>% round(2)`\ \text{veh}\times\text{sec}}{`r area`\ \text{km}\times\text{s}}
+= `r vpkm %>% round(1)`\ \text{veh/km},
+$$
+$$
+\text{and }v_s = \frac{`r sum(dists) %>% round(2)`\ \text{veh}\times\text{km}}{`r sum(times) %>% round(2)`\ \text{veh}\times\text{s}}
+\times 3600\ \frac{\text{sec}}{\text{hr}} = 
+`r kph %>% round(1)`\ \text{km/h}.
+$$
+
+```{r}
+#| label: tbl-bbox-vehicles
+#| tbl-cap: Vehicle Entry and Exit of Bounding Box
+
+bbox %>% 
+  mutate(across(where(is.numeric), \(x) round(x,2))) %>% 
+  flextable() %>% 
+  compose(j = "v", value = as_paragraph(as_equation(v))) %>% 
+  colformat_double(j = ~ tout + ttot, digits = 1) %>% 
+  colformat_double(j = ~ speed, digits = 0) %>% 
+  set_header_labels(
+    v = "Vehicle",
+    xin = "Entry",
+    xout = "Exit",
+    xtot = "Total",
+    tin = "Entry",
+    tout = "Exit",
+    ttot = "Total",
+    speed = "Vehicle\nSpeed (km/h)"
+  ) %>% 
+  add_header_row(
+    values = c("Vehicle", "Distance (km)", "Time (s)", "Vehicle\nSpeed (km/h)"),
+    colwidths = c(1,3,3,1)) %>% 
+  merge_v(part = "header") %>% 
+  align(align = "c", part = "a")
+```
+
+(g) The general relationship between speed, density, and flow is $q = k\times v_s$.
+Using the values obtained in (f) to determine if this holds:
+
+\begin{align*}
+`r vph %>% round()` &\stackrel{?}{=} `r vpkm %>% round(1)` \times `r kph %>% round(1)`\\
+`r vph %>% round()` &= `r (vpkm*kph) %>% round()`
+\end{align*}
+
+The relationship holds here.
+However, taking the harmonic mean of the speeds in @tbl-bbox-vehicles gives $v_s = `r hm(speeds) %>% round(1)`$ km/h, which differs from the result in (f).
+Therefore the relationship $q = k\times v_s$ would not hold with this value of $v_s$.
+The relationship is true by definition only if the values $q$, $k$, and $v_s$ are defined as in part (f).
+
+(h) Restricting our observations to $x = 0.2$km, there are 4 vehicles that pass this mark in the 10-second window from $t=5$s to $t=15$s.
+The flow is therefore $q = 4/10 = 0.4\ \text{veh/sec} = 1440$ vph.
+
+(i) There are 6 vehicles that are in the bounding box at $t=5$s, and the bounding box has a length of 0.3km, so the density is $k = 6/0.3 = 20$ veh/km.
+
+(j) Using values of flow, density, and speed from (h), (i), and (e) respectively, the relationship $q = k\times v$ does not hold:
+
+\begin{align*}
+1440 &\stackrel{?}{=} 20\times 80.8 \\
+1440 &\neq 1616
+\end{align*}
+
+This is because the values of $q$ and $k$ are taken from different measurement sources, and the average speed in (e) is not necessarily consistent with either of these sources.
