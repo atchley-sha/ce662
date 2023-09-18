@@ -1,0 +1,78 @@
+$VISION
+* File:		C:\Users\Public\Documents\PTV Vision\PTV Vissim 11\Tutorials & Guides\Tutorial First Steps\Vissim Files\Headquarters 04-1_hayden.inpx
+* Comment:	PTV Headquarters Training Example
+* Date:		9/18/2023 12:15:50 PM
+* PTV Vissim:	11.00 [09]
+* 
+* Table: Vehicle Network Performance Evaluation Results
+* 
+* SIMRUN: SimRun, Simulation run (Number of simulation run)
+* TIMEINT: TimeInt, Time interval
+* DELAYAVG(ALL): DelayAvg(All), Delay (average) (All) (Average delay per vehicle: Total delay / (Number of veh in the network + number of veh that have arrived)) [s]
+* STOPSAVG(ALL): StopsAvg(All), Stops (average) (All) (Average number of stops per vehicle: Total number of stops / (Number of veh in the network + number of veh that have arrived))
+* SPEEDAVG(ALL): SpeedAvg(All), Speed (average) (All) (Average speed: Total distance DistTot / Total travel time TravTmTot) [km/h]
+* DELAYSTOPAVG(ALL): DelayStopAvg(All), Delay stopped (average) (All) (Average standstill time per vehicle. Total standstill time / (Number of veh in the network + number of veh that have arrived)) [s]
+* DISTTOT(ALL): DistTot(All), Distance (total) (All) (Total distance of all vehicles that are in the network or have already left it.) [km]
+* TRAVTMTOT(ALL): TravTmTot(All), Travel time (total) (All) (Total travel time of vehicles traveling within the network or that have already left the network.) [s]
+* DELAYTOT(ALL): DelayTot(All), Delay (total) (All) (Total delay of all vehicles that are in the network or have already left it. The delay of a vehicle in a time step is the part of the time step that must also be used because the actual speed is less than the desired speed. For the calculation, the quotient is obtained by subtracting the actual distance traveled in this time step and desired speed from the duration of the time step. The following are taken into account:  (1) Passenger service times,  (2) Stop times at stop signs,  (3) StopDelay. The following are not taken into account: (1) Stop times of buses/trains at PT stops) [s]
+* STOPSTOT(ALL): StopsTot(All), Stops (total) (All) (Total number of stops of all vehicles that are in the network or have already arrived. The following ar not taken into account: (1) Scheduled stops at PT stops, (2) Stop in parking lots A stop is counted if the speed of the vehicle at the end of the previous time step was greater than 0 and is 0 at the end of the current time step.)
+* DELAYSTOPTOT(ALL): DelayStopTot(All), Delay stopped (total) (All) (Total standstill time of all vehicles that are in the network or have already arrived. Standstill time = time in which the vehicle is stationary (speed = 0) The following are not taken into account: (1) Stop times of buses/trains at PT stops, (2) Parking times, regardless of parking lot type) [s]
+* VEHACT(ALL): VehAct(All), Vehicles (active) (All) (Total number of vehicles in the network at the end of the simulation. The vehicles that have arrived VehArr (Vehicles (arrived) and the vehicles not deployed are not accounted for.)
+* VEHARR(ALL): VehArr(All), Vehicles (arrived) (All) (Vehicles arrived: Total number of vehicles which have already reached their destination and have left the network before the end of the simulation.)
+* DELAYLATENT: DelayLatent, Delay (latent) (Total delay of vehicles that cannot be used (immediately). Total waiting time of vehicles from input flows and parking lots that were not used at their actual start time in the network. This value may also include the waiting time of vehicles that enter the network before the end of the simulation.) [s]
+* DEMANDLATENT: DemandLatent, Demand (latent) (Number of vehicles that could not be used from input flows and parking lots. Number of vehicles that were not allowed to enter the network from input flows and parking lots until the end of the simulation. These vehicles are not counted as vehicles in the VehAct network.)
+* EMISSIONSEVAPORATIONHC(ALL): EmissionsEvaporationHC(All), Emissions (evaporation) HC (All) (Quantity of evaporated hydrocarbons [grams])
+* EMISSIONSBENZENE(ALL): EmissionsBenzene(All), Emissions benzene (All) (Quantity of benzene [grams])
+* EMISSIONSCO2(ALL): EmissionsCO2(All), Emissions CO2 (All) (Quantity of carbon monoxide [grams])
+* EMISSIONSHC(ALL): EmissionsHC(All), Emissions HC (All) (Quantity of burnt hydrocarbons [grams])
+* EMISSIONSNMHC(ALL): EmissionsNMHC(All), Emissions NMHC (All) (Quantity of non-methane hydrocarbons without oxygenated compounds [grams])
+* EMISSIONSNMOG(ALL): EmissionsNMOG(All), Emissions NMOG (All) (Quantity of non-methane hydrocarbons including oxygenated compounds [grams])
+* EMISSIONSNOX(ALL): EmissionsNOx(All), Emissions NOx (All) (Quantity of nitrogen oxides [grams])
+* EMISSIONSPARTICULATES(ALL): EmissionsParticulates(All), Emissions particulates (All) (Quantity of particulate matter [grams])
+* EMISSIONSSO2(ALL): EmissionsSO2(All), Emissions SO2 (All) (Quantity of sulfur dioxide [grams])
+* EMISSIONSSOOT(ALL): EmissionsSoot(All), Emissions soot (All) (Quantity of sooty particles [grams])
+* EMISSIONSCO(ALL): EmissionsCO(All), Emissions CO (All) (Quantity of carbon monoxide [grams])
+* EMISSIONS224TMP(ALL): Emissions224TMP(All), Emissions 2,2,4-trimethylpentane (All) (Quantity of 2,2,4-trimethylpentane [grams])
+* EMISSIONSCH4(ALL): EmissionsCH4(All), Emissions CH4 (All) (Quantity of methane (CH4) [grams])
+* EMISSIONSELEMENTALCARBON(ALL): EmissionsElementalCarbon(All), Emissions elemental carbon (All) (Quantity of elemental carbon [grams])
+* EMISSIONSETHYLBENZENE(ALL): EmissionsEthylBenzene(All), Emissions ethyl benzene (All) (Quantity of ethyl benzene [grams])
+* EMISSIONSMTBE(ALL): EmissionsMTBE(All), Emissions methyl tert-butyl ether (All) (Quantity of MTBE [grams])
+* EMISSIONSN2O(ALL): EmissionsN2O(All), Emissions N2O (All) (Quantity of nitrous oxide (N2O) [grams])
+* EMISSIONSNH3(ALL): EmissionsNH3(All), Emissions NH3 (All) (Quantity of ammonia (NH3) [grams])
+* EMISSIONSNO3(ALL): EmissionsNO3(All), Emissions NO3 (All) (Quantity of nitrate (NO3) [grams])
+* EMISSIONSPM10BRAKES(ALL): EmissionsPM10brakes(All), Emissions PM10 brakes (All) (Quantity of primary PM10 - brakewear particulate [grams])
+* EMISSIONSPM10TIRES(ALL): EmissionsPM10tires(All), Emissions PM10 tires (All) (Quantity of primary PM10 - tirewear particulate [grams])
+* EMISSIONSPM10TOTAL(ALL): EmissionsPM10total(All), Emissions PM10 total (All) (Quantity of primary exhaust PM10 - total [grams])
+* EMISSIONSPM25BRAKES(ALL): EmissionsPM25brakes(All), Emissions PM2.5 brakes (All) (Quantity of primary PM2.5 - brakewear particulate [grams])
+* EMISSIONSPM25TIRES(ALL): EmissionsPM25tires(All), Emissions PM2.5 tires (All) (Quantity of primary PM2.5 - tirewear particulate [grams])
+* EMISSIONSPM25TOTAL(ALL): EmissionsPM25total(All), Emissions PM2.5 total (All) (Quantity of primary exhaust PM2.5 - total [grams])
+* EMISSIONSSULFATEPARTICULATES(ALL): EmissionsSulfateParticulates(All), Emissions sulfate particulates (All) (Quantity of sulfate particulate [grams])
+* EMISSIONSTOG(ALL): EmissionsTOG(All), Emissions total organic gases (All) (Quantity of total organic gases [grams])
+* EMISSIONSTOLUENE(ALL): EmissionsToluene(All), Emissions toluene (All) (Quantity of toluene [grams])
+* EMISSIONSXYLENE(ALL): EmissionsXylene(All), Emissions xylene (All) (Quantity of xylene [grams])
+* EMISSIONSVOC(ALL): EmissionsVOC(All), Emissions volatile organic compounds (All) (Quantity of volatile organic compounds [grams])
+* FUELCONSUMPTION(ALL): FuelConsumption(All), Fuel consumption (All) (Fuel consumption [US liquid gallon])
+* EMISSIONS13BUT(ALL): Emissions13BUT(All), Emissions 1,3-Butadiene (All) (Quantity of 1,3-Butadiene [grams])
+* EMISSIONSFORMALDEHYDE(ALL): EmissionsFormaldehyde(All), Emissions Formaldehyde (All) (Quantity of formaldehyde [grams])
+* EMISSIONSACETALDEHYDE(ALL): EmissionsAcetaldehyde(All), Emissions Acetaldehyde (All) (Quantity of acetaldehyde [grams])
+* EMISSIONSHEXANE(ALL): EmissionsHexane(All), Emissions Hexane (All) (Quantity of hexane [grams])
+* EMISSIONSNAPHTALENEGAS(ALL): EmissionsNaphtaleneGas(All), Emissions Naphtalene gas (All) (Quantity of naphtalene gas [grams])
+* 
+* SimRun; TimeInt; DelayAvg(All); StopsAvg(All); SpeedAvg(All); DelayStopAvg(All); DistTot(All); TravTmTot(All); DelayTot(All); StopsTot(All); DelayStopTot(All); VehAct(All); VehArr(All); DelayLatent; DemandLatent; EmissionsEvaporationHC(All); EmissionsBenzene(All); EmissionsCO2(All); EmissionsHC(All); EmissionsNMHC(All); EmissionsNMOG(All); EmissionsNOx(All); EmissionsParticulates(All); EmissionsSO2(All); EmissionsSoot(All); EmissionsCO(All); Emissions224TMP(All); EmissionsCH4(All); EmissionsElementalCarbon(All); EmissionsEthylBenzene(All); EmissionsMTBE(All); EmissionsN2O(All); EmissionsNH3(All); EmissionsNO3(All); EmissionsPM10brakes(All); EmissionsPM10tires(All); EmissionsPM10total(All); EmissionsPM25brakes(All); EmissionsPM25tires(All); EmissionsPM25total(All); EmissionsSulfateParticulates(All); EmissionsTOG(All); EmissionsToluene(All); EmissionsXylene(All); EmissionsVOC(All); FuelConsumption(All); Emissions13BUT(All); EmissionsFormaldehyde(All); EmissionsAcetaldehyde(All); EmissionsHexane(All); EmissionsNaphtaleneGas(All)
+*
+$VEHICLENETWORKPERFORMANCEMEASUREMENTEVALUATION:SIMRUN;TIMEINT;DELAYAVG(ALL);STOPSAVG(ALL);SPEEDAVG(ALL);DELAYSTOPAVG(ALL);DISTTOT(ALL);TRAVTMTOT(ALL);DELAYTOT(ALL);STOPSTOT(ALL);DELAYSTOPTOT(ALL);VEHACT(ALL);VEHARR(ALL);DELAYLATENT;DEMANDLATENT;EMISSIONSEVAPORATIONHC(ALL);EMISSIONSBENZENE(ALL);EMISSIONSCO2(ALL);EMISSIONSHC(ALL);EMISSIONSNMHC(ALL);EMISSIONSNMOG(ALL);EMISSIONSNOX(ALL);EMISSIONSPARTICULATES(ALL);EMISSIONSSO2(ALL);EMISSIONSSOOT(ALL);EMISSIONSCO(ALL);EMISSIONS224TMP(ALL);EMISSIONSCH4(ALL);EMISSIONSELEMENTALCARBON(ALL);EMISSIONSETHYLBENZENE(ALL);EMISSIONSMTBE(ALL);EMISSIONSN2O(ALL);EMISSIONSNH3(ALL);EMISSIONSNO3(ALL);EMISSIONSPM10BRAKES(ALL);EMISSIONSPM10TIRES(ALL);EMISSIONSPM10TOTAL(ALL);EMISSIONSPM25BRAKES(ALL);EMISSIONSPM25TIRES(ALL);EMISSIONSPM25TOTAL(ALL);EMISSIONSSULFATEPARTICULATES(ALL);EMISSIONSTOG(ALL);EMISSIONSTOLUENE(ALL);EMISSIONSXYLENE(ALL);EMISSIONSVOC(ALL);FUELCONSUMPTION(ALL);EMISSIONS13BUT(ALL);EMISSIONSFORMALDEHYDE(ALL);EMISSIONSACETALDEHYDE(ALL);EMISSIONSHEXANE(ALL);EMISSIONSNAPHTALENEGAS(ALL)
+1;300-2100;32.61;0.75;16.41;25.88;151.14;33153.80;22595.59;521;17936.17;17;676;28654.80;34.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+2;300-2100;31.46;0.73;16.79;24.81;156.62;33590.70;22651.39;529;17865.68;15;705;39964.30;37.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+3;300-2100;30.51;0.69;17.12;24.16;162.45;34150.80;22791.68;517;18043.83;19;728;27831.20;43.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+4;300-2100;28.07;0.66;18.04;21.85;154.78;30889.20;20017.41;474;15579.24;17;696;13328.70;18.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+5;300-2100;30.41;0.72;17.19;23.67;153.08;32049.40;21315.18;507;16590.53;13;688;16878.00;23.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+6;300-2100;32.66;0.71;16.39;26.20;145.70;32012.00;21851.49;474;17526.99;15;654;32309.80;35.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+7;300-2100;26.61;0.66;18.78;20.28;157.05;30107.50;19156.96;478;14599.47;17;703;5300.20;16.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+8;300-2100;30.35;0.73;17.16;23.63;146.41;30722.80;20458.96;493;15929.96;18;656;25416.00;46.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+9;300-2100;29.50;0.69;17.55;23.24;166.45;34140.50;22509.35;523;17732.91;20;743;40653.10;27.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+10;300-2100;30.34;0.70;17.31;23.89;149.60;31120.60;20690.36;478;16290.14;15;667;7674.50;14.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+AVG;300-2100;30.25;0.71;17.27;23.76;154.33;32193.73;21403.84;499;16809.49;17;692;23801.06;29.30;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+STDDEV;300-2100;1.87;0.03;0.73;1.76;6.64;1487.60;1278.27;22;1190.94;2;30;12560.94;11.37;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+MIN;300-2100;26.61;0.66;16.39;20.28;145.70;30107.50;19156.96;474;14599.47;13;654;5300.20;14.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+MAX;300-2100;32.66;0.75;18.78;26.20;166.45;34150.80;22791.68;529;18043.83;20;743;40653.10;46.00;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000;0.000
+
