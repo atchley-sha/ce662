@@ -71,12 +71,12 @@ v_m &= \frac{v_f}{2}.
 
 The Greenberg model is given by
 \begin{align}
-v = v_m\ln{\frac{k_j}{k}}. \label{greenberg}
+v = v_m\ln{\frac{kj}{k}}. \label{greenberg}
 \end{align}
 
 The capacity is again determined by setting $\frac{dq}{dk} = 0$, so a flow-density relationship is first determined:
 \begin{align}
-q = kv = kv_m(\ln k - \ln k_j). \label{gb-qk}
+q = kv = kv_m(\ln k_j - \ln k). \label{gb-qk}
 \end{align}
 
 Then:
@@ -93,7 +93,7 @@ $q_m$ is then given from \eqref{gb-qk} and \eqref{gb-km}:
 \begin{align}
 q_m = k_mv_m(\ln k_m - \ln k_j) &= k_mv_m\left(\ln \frac{k_m}{k_j}\right) \\
 q_m &= \frac{k_jv_m}{e}\left(\ln \frac{k_j}{ek_j}\right) \\
-q_m &= -\frac{k_jv_m}{e}
+q_m &= \frac{k_jv_m}{e}
 \end{align}
 
 {{< pagebreak >}}
