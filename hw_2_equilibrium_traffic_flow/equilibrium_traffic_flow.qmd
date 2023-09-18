@@ -91,7 +91,7 @@ k_m &= \frac{k_j}{e}. \label{gb-km}
 
 $q_m$ is then given from \eqref{gb-qk} and \eqref{gb-km}:
 \begin{align}
-q_m = k_mv_m(\ln k_j - \ln k_m) &= k_mv_m\left(\ln \frac{k_j}{k_m}\right) \\
+q_m &= k_mv_m(\ln k_j - \ln k_m) = k_mv_m\left(\ln \frac{k_j}{k_m}\right) \\
 q_m &= \frac{k_jv_m}{e}\left(\ln \frac{k_j}{k_j/e}\right) \\
 q_m &= \frac{k_jv_m}{e}
 \end{align}
@@ -99,4 +99,77 @@ q_m &= \frac{k_jv_m}{e}
 {{< pagebreak >}}
 
 # 4.8
+
+```{r}
+sk <- function(x){
+  val <- 172 - 3.72*x + 0.0346*x^2 - 0.00119*x^3
+  pmin(88.5, val)
+}
+
+qk <- function(x){
+  sk(x)*x
+}
+
+kj <- uniroot(sk, c(0,200))$root
+ff <- sk(0)
+
+qopt <- optimize(qk, c(0,200), maximum = TRUE)
+
+qm <- qopt$objective
+km <- qopt$maximum
+vm <- sk(km)
+
+skpoints <- tribble(
+  ~x, ~y, ~label,
+  0, ff, paste("Free-flow speed =", round(ff,1)),
+  kj, 0, paste("Jam density =", round(kj,1))
+)
+
+qkpoints <- tribble(
+  ~x, ~y, ~label,
+  km, qm, paste0("Capacity = ", round(qm), ", Density = ", round(km, 1))
+)
+```
+
+The empirical speed-density relationship given by
+\begin{align}
+v = \min\{88.5,\ 172 - 3.72k + 0.0346k^2 - 0.00119k^3\} \label{empirical}
+\end{align}
+is shown graphically in @fig-4-8-vk.
+The free-flow speed is the speed when the density is 0, or `r ff %>% round(1)` km/h.
+The jam density $k_j$ is the upper bound of the valid range of the model (i.e. where the speed is nonnegative), which is `r kj %>% round(1)` veh/km.
+
+```{r}
+#| label: fig-4-8-vk
+#| fig-cap: Empirical speed-density relationship.
+
+ggplot(tibble(dens = c(0:floor(kj), kj)), aes(x = dens)) +
+  stat_function(fun = sk) +
+  labs(x = "Density (veh/km)", y = "Speed (km/h)") +
+  scale_x_continuous(expand = expansion(mult = c(0,.05))) +
+  scale_y_continuous(expand = expansion(mult = c(0,.05))) +
+  theme_bw()
+```
+
+To find the capacity $q_m$ we need a flow-density plot.
+Since $q = k\times v$, from \eqref{empirical} we get
+\begin{align}
+q = k\times \min\{88.5,\ 172 - 3.72k + 0.0346k^2 - 0.00119k^3\}.
+\end{align}
+@fig-4-8-qk shows this graphically.
+$q_m$ is the maximum of this function, which is `r qm %>% round()` veh/h.
+$k_m$ is the density at capacity ($q_m$), or `r km %>% round(1)` veh/km.
+$v_m$ is the speed at this density, or `r vm %>% round(1)` km/h.
+
+```{r}
+#| label: fig-4-8-qk
+#| fig-cap: Empirical flow-density relationship.
+
+ggplot(tibble(dens = c(0:floor(kj), kj)), aes(x = dens)) +
+  stat_function(fun = qk) +
+  labs(x = "Density (veh/km)", y = "Flow (veh/h)") +
+  scale_x_continuous(expand = expansion(mult = c(0,.05))) +
+  scale_y_continuous(expand = expansion(mult = c(0,.05))) +
+  theme_bw()
+```
 
