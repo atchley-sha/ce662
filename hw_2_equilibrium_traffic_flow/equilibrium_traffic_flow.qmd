@@ -91,7 +91,7 @@ k_m &= \frac{k_j}{e}. \label{gb-km}
 
 $q_m$ is then given from \eqref{gb-qk} and \eqref{gb-km}:
 \begin{align}
-q_m = k_mv_m(\ln k_m - \ln k_j) &= k_mv_m\left(\ln \frac{k_m}{k_j}\right) \\
+q_m = k_mv_m(\ln k_j - \ln k_m) &= k_mv_m\left(\ln \frac{k_j}{k_m}\right) \\
 q_m &= \frac{k_jv_m}{e}\left(\ln \frac{k_j}{k_j/e}\right) \\
 q_m &= \frac{k_jv_m}{e}
 \end{align}
