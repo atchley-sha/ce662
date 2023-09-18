@@ -1,0 +1,56 @@
+---
+title: "Homework: Equilibrium Traffic Flow"
+subtitle: "4.1, 4.4, 4.8"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(flextable)
+require(equatags)
+
+hm <- function(vec){
+  n <- length(vec)
+  hm <- n / sum(1/vec)
+  hm
+}
+```
+
+# 4.1
+
+Given a speed-density relationship of $v = v_f(1-k/k_j)$ and the relationship $q = k\times v$, we can derive flow-density and speed-flow relationships as follows:
+\begin{align}
+q &= kv \nonumber\\
+q &= kv_f(1-\frac{k}{k_j}) \nonumber\\
+q &= kv_f - \frac{k^2v_f}{k_j} \label{qk}
+\end{align}  
+and
+\begin{align}
+k = \frac{q}{v},\quad v &= v_f(1-\frac{k}{k_j}) \nonumber\\
+\implies v &= v_f(1-\frac{q/v}{k_j}) \nonumber\\
+\implies v^2 &= v_fv - \frac{qv_f}{k_j}. \label{vq}
+\end{align}
+
+From \ref{qk} we can find $q_m$ (the capacity) and $k_m$ (the density at capacity) by determining the maximum of the flow-density relationship (where $\frac{dq}{dk} = 0$):
+
+\begin{align}
+q &= kv_f - \frac{k^2v_f}{k_j} \nonumber\\
+\frac{dq}{dk} = 0 &= v_f - 2\frac{k_mv_f}{k_j} \nonumber\\
+0 &= v_f(1 - 2\frac{k_m}{k_j}) \nonumber\\
+0 &= 1 - 2\frac{k_m}{k_j} \quad \text{if} v_f \neq 0 \nonumber\\
+k_m &= \frac{k_j}{2} \label{km}\\
+\\
+q_m &= k_mv_f (1 - \frac{k_m}{k_j}) \nonumber\\
+q_m &= \frac{k_jv_f}{2}(1 - \frac{k_j/2}{k_j}) \nonumber\\
+q_m &= \frac{k_jv_f}{4} \label{qm}
+\end{align}
+
