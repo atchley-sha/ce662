@@ -9,4 +9,30 @@ execute:
 format: pdf
 ---
 
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+
+delay <- read_delim("data/network_results.att", skip = 1, comment = "*")
+```
+
+
 I created a working local simulation of the Vissim "First Steps" model by following the steps in the tutorial.
+This model is of an intersection near the PTV Group headquarters in Karlsruhe, Germany.
+See @fig-site for imagery of the site.
+
+![Aerial imagery of modeled site.](data/site.png){#fig-site width="100%"}
+
+Each iteration of the simulation ran for 30 minutes after a 5-minute startup period in order to allow the network to become loaded.
+The simulation ran for 10 iterations, and the delay measurements are presented in @tbl-delay.
+
+```{r}
+#| label: tbl-delay
+#| tbl-cap: Delay Measurements of Model
+
+
+```
+
