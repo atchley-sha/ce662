@@ -1,0 +1,69 @@
+---
+title: "Homework: Conservation"
+subtitle: "5.1, 5.3"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(flextable)
+
+set_flextable_defaults(
+  float = "float"
+)
+```
+
+# 5.1
+
+```{r}
+#| include: false
+
+distance <- 1.5 #miles
+interval <- 1 #hours
+
+tunnel <- read_csv("data/tunnel.csv") %>% 
+  mutate(time = hour %>% hours() %>% as_datetime())
+```
+
+@tbl-tunnel shows vehicle counts from the Lincoln Tunnel's `r distance`-mile long south tunnel.
+The counts are binned by hour over a 24-hour period, and are for both entering and exiting vehicles.
+
+```{r}
+#| label: tbl-tunnel
+#| tbl-cap: Lincoln Tunnel Vehicle Counts
+
+tunnel %>% 
+  flextable(col_keys = c("time", "vin", "vout")) %>% 
+  set_header_labels(time = "Time", vin = "Vehicles\nEntering", vout = "Vehicles\nExiting") %>% 
+  colformat_datetime(fmt_datetime = "%H:%M") %>% 
+  autofit() %>% 
+  align(align = "c", part = "a")
+```
+
+```{r}
+tunnel %>% 
+  mutate(
+    dx = distance,
+    dt = interval,
+    qi = vin/dt, #vph
+    qo = vout/dt, #vph
+    ki = vin/dx, #v/mi
+    ko = vout/dx, #v/mi
+    )
+```
+
+More words.
+
+# 5.3
+
+
+
