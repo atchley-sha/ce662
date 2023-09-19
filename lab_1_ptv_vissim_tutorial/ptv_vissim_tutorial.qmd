@@ -14,9 +14,29 @@ format: pdf
 #| include: false
 
 library(tidyverse)
-library(kableExtra)
+library(flextable)
 
-delay <- read_delim("data/network_results.att", skip = 1, comment = "*")
+set_flextable_defaults(
+  # float = "float"
+)
+
+delay <- read_delim("data/network_results.att", skip = 1, comment = "*") %>% 
+  select(-matches("EMISSIONS|FUEL"), -TIMEINT) %>% 
+  rename(run = 1)
+
+dpv <- delay$`DELAYAVG(ALL)`[delay$run == "AVG"]
+
+los <- tribble(
+  ~LOS, ~min, ~max, ~range,
+  "A", 0, 10, "\u226410 sec",
+  "B", 10, 20, "10\u201320 sec",
+  "C", 20, 35, "20\u201335 sec",
+  "D", 35, 55, "35\u201355 sec",
+  "E", 55, 80, "55\u201385 sec",
+  "F", 80, Inf, ">80 sec"
+)
+
+ilos <- los$LOS[dpv > los$min & dpv <= los$max]
 ```
 
 
@@ -24,7 +44,13 @@ I created a working local simulation of the Vissim "First Steps" model by follow
 This model is of an intersection near the PTV Group headquarters in Karlsruhe, Germany.
 See @fig-site for imagery of the site.
 
-![Aerial imagery of modeled site.](data/site.png){#fig-site width="100%"}
+```{r}
+#| label: fig-site
+#| fig-cap: Aerial imagery of modeled site.
+#| out-width: 100%
+
+knitr::include_graphics("data/site.png")
+```
 
 Each iteration of the simulation ran for 30 minutes after a 5-minute startup period in order to allow the network to become loaded.
 The simulation ran for 10 iterations, and the delay measurements are presented in @tbl-delay.
@@ -33,6 +59,36 @@ The simulation ran for 10 iterations, and the delay measurements are presented i
 #| label: tbl-delay
 #| tbl-cap: Delay Measurements of Model
 
-
+delay %>% 
+  filter(!run %in% c("STDDEV", "MIN", "MAX")) %>% 
+  select(run, `DELAYAVG(ALL)`, `DELAYTOT(ALL)`) %>% 
+  flextable() %>% 
+  set_header_labels(
+    run = "Run",
+    `DELAYAVG(ALL)` = "Delay per Vehicle (s)",
+    `DELAYTOT(ALL)` = "Total Delay (s)"
+  ) %>% 
+  autofit() %>% 
+  align(align = "c", part = "a") %>% 
+  valign(part = "a") %>% 
+  colformat_double(j = 3, digits = 0) %>% 
+  hline(~ lead(run == "AVG"))
 ```
+
+The average delay per vehicle across all iterations is `r dpv` seconds, which according to the Highway Capacity Manual's Level of Service values [@tbl-los] rates this intersection at LOS `r ilos`.
+This is generally desirable, and represents a serviceable intersection that is not over-designed.
+
+```{r}
+#| label: tbl-los
+#| tbl-cap: Signalized Intersection Level of Service
+
+los %>% 
+  flextable(c("LOS", "range")) %>% 
+  set_header_labels(range = "Delay per Vehicle (s)") %>% 
+  align(align = "c", part = "a") %>% 
+  valign(part = "a") %>% 
+  autofit()
+```
+
+
 
