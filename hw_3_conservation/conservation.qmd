@@ -29,9 +29,36 @@ set_flextable_defaults(
 
 distance <- 1.5 #miles
 interval <- 1 #hours
+nlanes <- 2
 
 tunnel <- read_csv("data/tunnel.csv") %>% 
   mutate(time = hour %>% hours() %>% as_datetime())
+
+los <- tribble(
+  ~los, ~smin, ~max,
+  "A", -Inf, 11,
+  "B", 11, 18,
+  "C", 18, 26,
+  "D", 26, 35,
+  "E", 35, 45,
+  "F", 45, Inf
+) %>% 
+  mutate(label = case_when(
+    smin <= 0 ~ paste("&le;", max),
+    max == Inf ~ paste("&gt;", smin),
+    TRUE ~ paste0(smin, "&ndash;", max)
+  ))
+
+calc_tunnel <- tunnel %>% 
+  mutate(
+    sum_vin = cumsum(vin),
+    sum_vout = cumsum(vout),
+    vtunnel = sum_vin - sum_vout,
+    dens = vtunnel / distance,
+    dens_lane = dens / nlanes
+    ) %>% 
+  left_join(los, join_by(between(dens_lane, smin, max, bounds = "(]"))) %>% 
+  select(-c(smin, max, label))
 ```
 
 @tbl-tunnel shows vehicle counts from the Lincoln Tunnel's `r distance`-mile long south tunnel.
@@ -50,15 +77,24 @@ tunnel %>%
 ```
 
 ```{r}
-tunnel %>% 
-  mutate(
-    dx = distance,
-    dt = interval,
-    qi = vin/dt, #vph
-    qo = vout/dt, #vph
-    ki = vin/dx, #v/mi
-    ko = vout/dx, #v/mi
-    )
+#| label: tbl-calc-tunnel
+#| tbl-cap: Density and LOS Calculations for Lincoln Tunnel
+
+calc_tunnel %>% 
+  flextable(col_keys = c("time", "sum_vin", "sum_vout", "vtunnel", "dens", "dens_lane", "los")) %>% 
+  set_header_labels(
+    time = "Time", 
+    sum_vin = "Cumulative Vehicles\nEntering",
+    sum_vout = "Cumulative Vehicles\nExiting",
+    vtunnel = "Vehicles In\nTunnel (En&minus;Ex)",
+    dens = "Density\n(veh/mi)",
+    dens_lane = "Lane Density\n(veh/mi/lane)",
+    los = "Level of\nService"
+  ) %>% 
+  colformat_datetime(fmt_datetime = "%H:%M") %>% 
+  colformat_double(j = ~ dens + dens_lane, digits = 2) %>% 
+  autofit() %>% 
+  align(align = "c", part = "a")
 ```
 
 More words.
