@@ -39,10 +39,7 @@ los <- tribble(
 ilos <- los$LOS[dpv > los$min & dpv <= los$max]
 ```
 
-
-I created a working local simulation of the Vissim "First Steps" model by following the steps in the tutorial.
-This model is of an intersection near the PTV Group headquarters in Karlsruhe, Germany.
-See @fig-site for imagery of the site.
+I created a working local simulation of the Vissim "First Steps" model by following the steps in the tutorial. This model is of an intersection near the PTV Group headquarters in Karlsruhe, Germany. See @fig-site for imagery of the site.
 
 ```{r}
 #| label: fig-site
@@ -52,8 +49,7 @@ See @fig-site for imagery of the site.
 knitr::include_graphics("data/site.png")
 ```
 
-Each iteration of the simulation ran for 30 minutes after a 5-minute startup period in order to allow the network to become loaded.
-The simulation ran for 10 iterations, and the delay measurements are presented in @tbl-delay.
+Each iteration of the simulation ran for 30 minutes after a 5-minute startup period in order to allow the network to become loaded. The simulation ran for 10 iterations, and the delay measurements are presented in @tbl-delay.
 
 ```{r}
 #| label: tbl-delay
@@ -75,8 +71,7 @@ delay %>%
   hline(~ lead(run == "AVG"))
 ```
 
-The average delay per vehicle across all iterations is `r dpv` seconds, which according to the Highway Capacity Manual's Level of Service values [@tbl-los] rates this intersection at LOS `r ilos`.
-This is generally desirable, and represents a serviceable intersection that is not over-designed.
+The average delay per vehicle across all iterations is `r dpv` seconds, which according to the Highway Capacity Manual's Level of Service values (@tbl-los) rates this intersection at LOS `r ilos`. This is generally desirable, and represents a serviceable intersection that is not over-designed.
 
 ```{r}
 #| label: tbl-los
@@ -89,6 +84,3 @@ los %>%
   valign(part = "a") %>% 
   autofit()
 ```
-
-
-
