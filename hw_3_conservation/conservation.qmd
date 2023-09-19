@@ -16,9 +16,10 @@ format: pdf
 
 library(tidyverse)
 library(flextable)
+library(ftExtra)
 
 set_flextable_defaults(
-  float = "float"
+  float = "float",
 )
 ```
 
@@ -76,6 +77,25 @@ tunnel %>%
   align(align = "c", part = "a")
 ```
 
+The level of service (LOS) of the tunnel is determined by the density, as shown in @tbl-los.
+
+```{r}
+#| label: tbl-los
+#| tbl-cap: LOS of Highway Segment
+
+los %>% 
+  flextable(col_keys = c("los", "label")) %>% 
+  set_header_labels(los = "LOS", label = "Density (veh/mi/lane)") %>% 
+  colformat_md() %>% 
+  autofit() %>% 
+  align(align = "c", part = "a")
+```
+
+For each hour, the density is calculated from the number of vehicles in the tunnel.
+This is given by the difference in cumulative entering vehicles and cumulative exiting vehicles.
+The tunnel is `r distance` miles in length and has `r nlanes` lanes, so the density per lane is given by $k_l = \frac{N_\text{tunnel}}{`r distance`\times `r nlanes`}$.
+@tbl-calc-tunnel shows this for each hour.
+
 ```{r}
 #| label: tbl-calc-tunnel
 #| tbl-cap: Density and LOS Calculations for Lincoln Tunnel
@@ -84,20 +104,20 @@ calc_tunnel %>%
   flextable(col_keys = c("time", "sum_vin", "sum_vout", "vtunnel", "dens", "dens_lane", "los")) %>% 
   set_header_labels(
     time = "Time", 
-    sum_vin = "Cumulative Vehicles\nEntering",
-    sum_vout = "Cumulative Vehicles\nExiting",
-    vtunnel = "Vehicles In\nTunnel (En&minus;Ex)",
+    sum_vin = "Cumulative\nVehicles Entering",
+    sum_vout = "Cumulative\nVehicles Exiting",
+    vtunnel = "Vehicles In&NewLine;Tunnel (En&minus;Ex)",
     dens = "Density\n(veh/mi)",
     dens_lane = "Lane Density\n(veh/mi/lane)",
     los = "Level of\nService"
   ) %>% 
   colformat_datetime(fmt_datetime = "%H:%M") %>% 
   colformat_double(j = ~ dens + dens_lane, digits = 2) %>% 
+  colformat_md(j = vtunnel, part = "h") %>% 
   autofit() %>% 
+  fit_to_width(7) %>% 
   align(align = "c", part = "a")
 ```
-
-More words.
 
 # 5.3
 
