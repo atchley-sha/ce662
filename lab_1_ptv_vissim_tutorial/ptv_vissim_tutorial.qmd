@@ -84,7 +84,7 @@ This is generally desirable, and represents a serviceable intersection that is n
 
 los %>% 
   flextable(c("LOS", "range")) %>% 
-  set_header_labels(range = "Delay per Vehicle (s)") %>% 
+  set_header_labels(range = "Delay per Vehicle") %>% 
   align(align = "c", part = "a") %>% 
   valign(part = "a") %>% 
   autofit()
