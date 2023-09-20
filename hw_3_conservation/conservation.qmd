@@ -19,7 +19,7 @@ library(flextable)
 library(ftExtra)
 
 set_flextable_defaults(
-  float = "float",
+  # float = "float",
 )
 ```
 
@@ -32,7 +32,7 @@ distance <- 1.5 #miles
 interval <- 1 #hours
 nlanes <- 2
 
-tunnel <- read_csv("data/tunnel.csv") %>% 
+tunnel <- read_csv("tunnel.csv") %>% 
   mutate(time = hour %>% hours() %>% as_datetime())
 
 los <- tribble(
@@ -45,7 +45,7 @@ los <- tribble(
   "F", 45, Inf
 ) %>% 
   mutate(label = case_when(
-    smin <= 0 ~ paste("&le;", max),
+    smin <= 0 ~ paste("&lt;", max),
     max == Inf ~ paste("&gt;", smin),
     TRUE ~ paste0(smin, "&ndash;", max)
   ))
@@ -74,7 +74,7 @@ tunnel %>%
   set_header_labels(time = "Time", vin = "Vehicles\nEntering", vout = "Vehicles\nExiting") %>% 
   colformat_datetime(fmt_datetime = "%H:%M") %>% 
   autofit() %>% 
-  align(align = "c", part = "a")
+  align(align = "c", part = "a") 
 ```
 
 The level of service (LOS) of the tunnel is determined by the density, as shown in @tbl-los.
@@ -86,7 +86,7 @@ The level of service (LOS) of the tunnel is determined by the density, as shown 
 los %>% 
   flextable(col_keys = c("los", "label")) %>% 
   set_header_labels(los = "LOS", label = "Density (veh/mi/lane)") %>% 
-  colformat_md() %>% 
+  colformat_md(j = label) %>%
   autofit() %>% 
   align(align = "c", part = "a")
 ```
@@ -113,13 +113,52 @@ calc_tunnel %>%
   ) %>% 
   colformat_datetime(fmt_datetime = "%H:%M") %>% 
   colformat_double(j = ~ dens + dens_lane, digits = 2) %>% 
-  colformat_md(j = vtunnel, part = "h") %>% 
+  colformat_md(j = vtunnel, part = "h") %>%
   autofit() %>% 
-  fit_to_width(7) %>% 
-  align(align = "c", part = "a")
+  align(align = "c", part = "a") %>% 
+  fit_to_width(6.5) 
 ```
 
 # 5.3
 
+```{r}
+#| include: false
+
+length <- 2 #miles
+vehlen <- 29.3 #feet
+qinhwy <- 2600 #vph
+qinramp <- 400 #vph
+qo <- 1800 #vph
+nlanes <- 2
+starttime <- hours(8) %>% as_datetime() #8:00 AM
+# %>% format("%H:%M %p")
+
+qin <- qinhwy + qinramp
+nvehlane <- ((length*5280)/vehlen) %>% floor()
+nveh <- nvehlane*2
+
+qdiff <- qin-qo
+buhours <- nveh/qdiff #hours
+bumin <- round(buhours*60) #minutes
+
+butime <- starttime + minutes(bumin)
+```
 
 
+A crash on Interstate 91 occurred at `r starttime %>% format("%H:%M %p")`, blocking one of the `r nlanes` lanes and reducing the discharge rate of the highway segment to `r qo` vehicles per hour.
+The inflow to this segment is `r qinhwy` vehicles per hour.
+Additionally, `r length` miles ahead of the crash is an on-ramp with an inflow of `r qinramp` vehicles per hour.
+See @fig-crash for a depiction.
+
+```{r}
+#| label: fig-crash
+#| fig-cap: Depiction of the section of I-91 with the crash.
+
+knitr::include_graphics("crash.png")
+```
+
+The Massachusetts Department of Transportation wants to avoid vehicles backing up to the on-ramp, which will happen at some point since the inflow is greater than the discharge.
+Assuming a consistent vehicle spacing (front bumper to front bumper) of `r vehlen` feet, the `r length`-mile segment will be backed up when there are `r nvehlane` vehicles in each lane.
+Because there are `r nlanes` lanes, when `r nveh` vehicles are in this segment the highway will be backed up to the on-ramp.
+The difference in inflow and discharge is `r qdiff` vehicles per hour, so this will occur in `r buhours` hours or `r bumin` minutes.
+This means that the Department of Transportation has until `r butime %>% format("%H:%M %p")` to clear the crash before the highway is backed up to the on-ramp.
