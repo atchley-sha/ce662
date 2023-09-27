@@ -47,28 +47,14 @@ wB <- wj
 UAB <- ((qA-qB)/(kA-kB)) %>% round(1)
 ```
 
+@fig-annotated-qk shows an annotated flow-density curve with the following: (a) $v_f = `r vf`$ kph; (b) $k_j = `r kj`$ v/km; (c) $q_m=`r qm`$ vph, $k_m=`r km`$ v/km, $v_m=`r vm`$ kph; (d) $q_A=`r qA`$ vph, $k_A=`r kA`$ v/km, $v_A=`r vA`$ kph; (e) \$q_B=`r qB` \$vph, $k_B=`r kB`$ v/km, $v_B=`r vB`$ kph; (f) $w_f=`r wf`$ kph, $w_j=`r wj`$ kph, $w_m=`r wm`$ kph, $w_a=`r wA`$ kph, $w_B=`r wB`$ kph; (g) $U_{AB}=`r UAB`$ kph.
 
-@fig-annotated-qk shows an annotated flow-density curve with the following:
-(a) $v_f = `r vf`$ kph;
-(b) $k_j = `r kj`$ v/km;
-(c) $q_m=`r qm`$ vph, $k_m=`r km`$ v/km, $v_m=`r vm`$ kph;
-(d) $q_A=`r qA`$ vph, $k_A=`r kA`$ v/km, $v_A=`r vA`$ kph;
-(e) $q_B=`r qB` $vph, $k_B=`r kB`$ v/km, $v_B=`r vB`$ kph;
-(f) $w_f=`r wf`$ kph, $w_j=`r wj`$ kph, $w_m=`r wm`$ kph, $w_a=`r wA`$ kph, $w_B=`r wB`$ kph;
-(g) $U_{AB}=`r UAB`$ kph.
-
-```{r}
-#| label: fig-annotated-qk
-#| fig-cap: Annotated flow-density relationship.
-
-knitr::include_graphics("annotated_fig.png")
-```
-
+![Annotated flow-density relationship.](annotated_fig.png){#fig-annotated-qk}
 
 # 8.3
 
 ```{r}
-#| eval: false
+#| eval: true
 #| include: false
 corners <- tibble(
   x = c(7,8) %>% hours() %>% as_datetime(),
@@ -84,7 +70,89 @@ ggplot(corners, aes(x,y)) +
   theme(plot.margin = margin(0.5,0.5,0.5,0.5, "cm"))
 ```
 
+```{r}
+#| include: false
 
+time <- abs(8/UAB*60) %>% round()
+endtime <- corners[[1,1]] + time %>% minutes()
+```
+
+Traffic on a 16-km stretch of Interstate 90 is observing the flow-density relationship as seen in @fig-annotated-qk.
+The traffic is initially operating at condition B.
+At 07:00PM the demand upstream of the midpoint of this segment drops and traffic begins to operate at condition A.
+See @fig-graph-2 for a time-space diagram depicting this.
+At 07:30PM the traffic (b) 2km upstream and (a) 2km downstream of the midpoint are both operating under condition B.
+(c) The queue will reach the upstream end of this segment when the shockwave $AB$ has traveled 8 km.
+Because the speed of the shockwave $U_{AB}$ is `r abs(UAB)` kph, this will happen after `r time` minutes, or at `r endtime %>% format("%R")`PM.
+
+![Time-space diagram of Interstate 90 segment.](graph_2.png){#fig-graph-2 width="6in"}
+
+{{< pagebreak >}}
 
 # 8.6
 
+*An intelligent transportation system problem.* On Wednesday at 9:00 a.m., there is an accident on northbound Interstate 91.
+The traffic operation center (TOC) has to decide how to clean up the accident.
+After collecting information and communicating with highway patrol and emergency operator, the TOC determines that there are two alternatives:
+
+1.  Completely shut Interstate 91 for 10 minutes, clean it up, and then reopen Interstate 91 for normal operation.
+2.  Partially open Interstate 91 at reduced capacity, but the cleanup requires 30 minutes before normal operation can resume.
+
+@tbl-crash-conditions gives the flow, density, and speed for each relevant traffic condition on this segment of the I-91.
+
+```{r}
+#| label: tbl-crash-conditions
+#| tbl-cap: Traffic Conditions on I-91
+
+q <- c(2000,0,2200,1100) %>% 
+  `names<-`(c("A", "D", "C", "E"))
+k <- c(40,200,60,145) %>% 
+  `names<-`(c("A", "D", "C", "E"))
+
+conditions <- tribble(
+  ~Condition, ~Description,
+  "A", "Arrival Flow",
+  "D", "Queued Flow",
+  "C", "Capacity Flow",
+  "E", "Reduced Flow",
+) %>% 
+  bind_cols(q = q,k = k) %>% 
+  mutate(v = round(q/k, 1))
+
+conditions %>%
+  flextable() %>% 
+  set_header_labels(q = "q (vph)", k = "k (v/km)", v = "v (kph)") %>% 
+  align(align = 'c', part = 'a') %>% 
+  autofit()
+```
+
+```{r}
+#| include: false
+U <- c()
+U["AD"] <- (q["A"] - q["D"])/(k["A"] - k["D"])
+U["CD"] <- (q["C"] - q["D"])/(k["C"] - k["D"])
+U["AE"] <- (q["A"] - q["E"])/(k["A"] - k["E"])
+U["CE"] <- (q["C"] - q["E"])/(k["C"] - k["E"])
+
+tclose <- abs((10/60)*U["CD"]/(U["CD"] - U["AD"]))
+dclose <- abs(tclose*U["AD"])
+
+treduce <- abs((30/60)*U["CE"]/(U["CE"] - U["AE"]))
+dreduce <- abs(treduce*U["AE"])
+```
+
+@fig-crash-close shows a time-space diagram for alternative 1, where the interstate is closed for 10 minutes.
+
+![Time-space diagram of closing I-91 for 10 minutes.](crash_close.png){#fig-crash-close height="3.5in"}
+
+The point $(t,d)$ where the shockwaves $AD$ and $CD$ intersect is the solution to the equation $d = U_{AD}t = U_{CD}(t-\frac{10}{60})$.
+Given that $U_{AD} = `r U["AD"] %>% round(1)`$ and $U_{CD} = `r U["CD"] %>% round(1)`$, we find that $(t,d) = (`r tclose %>% round(2)`,`r dclose %>% round()`)$.
+
+@fig-crash-reduce shows a time-space diagram for alternative 2, where the flow on the interstate is reduced for 30 minutes.
+
+![Time-space diagram of reducing flow on  I-91 for 30 minutes.](crash_reduced.png){#fig-crash-reduce height="3.5in"}
+
+The point $(t,d)$ where the shockwaves $AE$ and $CE$ intersect is the solution to the equation $d = U_{AE}t = U_{CE}(t-\frac{30}{60})$.
+Given that $U_{AE} = `r U["AE"] %>% round(1)`$ and $U_{CE} = `r U["CE"] %>% round(1)`$, we find that $(t,d) = (`r treduce %>% round(2)`,`r dreduce %>% round()`)$.
+
+As it turns out, the total queue length will be shorter for alternative 1, where the interstate is closed for 10 minutes.
