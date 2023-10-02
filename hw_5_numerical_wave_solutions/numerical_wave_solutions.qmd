@@ -1,0 +1,82 @@
+---
+title: "Homework: Numerical Wave Solutions"
+subtitle: "9.2, 9.3"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+
+write_vec <- function(v){
+  res <- case_when(
+    length(v) < 1 ~ "NULL",
+    length(v) == 1 ~ as.character(v),
+    length(v) == 2 ~ paste(v[1], "and", v[2]),
+    length(v) > 2 ~ paste(
+      paste(v[1:(length(v)-1)], collapse = ", "),
+      v[length(v)],
+      sep = ", and "
+    )
+  )
+  
+  res[1]
+}
+```
+
+
+# 9.2
+
+```{r}
+seglen <- 200 #meters
+n <- c(6,4,5) #vehicles
+t <- 5 #seconds
+dv <- c(2,2)
+
+on2 <- 1
+off3 <- 2
+
+nt2x2 = (n[1] + n[3])/2 - (dv[1] - dv[2])/2 + (-off3 + 0)/2
+kt2x2 = nt2x2/seglen*1000 #veh/km
+```
+
+@fig-kronos depicts a roadway segment divided into 3 `r seglen`-meter links ($x_1,\ x_2,\ x_3$).
+The storage on each link at time step $t_1$ are `r write_vec(n)` vehicles respectively.
+In the next time step $t_2$ (with a step size of $\Delta t = `r t`$ seconds), `r dv[1]` vehicles move from link $x_1$ to $x_2$, and `r dv[2]` vehicles move from $x_2$ to $x_3$.
+Additionally, `r on2` vehicles enter link $x_2$ via an on-ramp and `r off3` vehicles exit $x_3$ via an off-ramp.
+
+![Depiction of road segment with volumes and vehicle movements.](kronos.png){#fig-kronos}
+
+The KRONOS model gives the vehicle storage on each link $n(t_i,x_j)$ for each time step $t_i$ and link $x_j$ as:
+
+$$
+n(t_i,x_j) = \frac{n(t_{i-1}, x_{j+1}) + n(t_{i-1}, x_{j-1})}{2} -
+\frac{\Delta tq(t_{i-1}, x_{j+1}) + \Delta tq(t_{i-1}, x_{j-1})}{2} +
+\frac{\Delta tg(t_{i-1}, x_{j+1}) + \Delta tg(t_{i-1}, x_{j-1})}{2},
+$$
+
+where $q(t_i,x_j)$ is the flow rate and $g(t_i,x_j)$ is the difference in on- and off-ramp flow on link $x_j$ at time $t_i$.
+
+In our case, the vehicle movement counts are given directly, so the storage on link $x_2$ at time $t_2$ ($n(t_1,x_2)$) is:
+
+$$
+n(t_2,x_2) = \frac{`r n[1]` + `r n[3]`}{2} -
+\frac{`r dv[1]` + `r -dv[2]`}{2} +
+\frac{`r -off3` + 0}{2},
+$$
+
+which gives (a) $n(t_2,x_2) = `r nt2x2`$ vehicles.
+The density in link 2 at this point is therefore (b) $k = \frac{n}{\Delta x} = `r kt2x2`$ vehicles per kilometer.
+
+
+# 9.3
+
