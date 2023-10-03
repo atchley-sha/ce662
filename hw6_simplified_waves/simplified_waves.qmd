@@ -1,0 +1,115 @@
+---
+title: "Homework: Simplified Waves"
+subtitle: "10.3"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(flextable)
+
+set_flextable_defaults(
+  float = "float"
+)
+```
+
+# 10.3
+
+```{r}
+#| include: false
+len <- 6 #km
+dx <- 3 #km
+wf <- 90 #kph
+wb <- 20
+qm <- 2160 #vph
+
+counts <- read_csv("counts.csv") %>% 
+  mutate(Time = as_datetime(Time))
+```
+
+A uniform freeway link $x_1x_3$ is `r len`&nbsp;km long.
+Node $x_2$ is the midpoint of $x_1x_3$.
+@tbl-counts gives data where D1, D2, and D3 are cumulative traffic counts at nodes $x_1$, $x_2$, and $x_3$, respectively.
+The flow-density relationship in @fig-flow applies uniformly on $x_1x_3$.
+
+```{r}
+#| label: tbl-counts
+#| tbl-cap: Traffic Counts on Freeway Segment
+
+counts %>%
+  flextable() %>% 
+  colformat_datetime(fmt_datetime = "%H:%M") %>% 
+  align(part = "a", align = "c")
+```
+
+![Flow-density relationship for freeway segment.](flow.png){#fig-flow height="3in"}
+
+The cumulative vehicle count at $x_2$ at 9:01 is given by
+$$
+N(\text{9:01},x_2) = \min \left\{
+N^\text{up}(\text{9:01}, x_2),
+N^\text{Q}(\text{9:01}, x_2),
+N^\text{dn}(\text{9:01}, x_2)
+\right\}.
+$$
+
+This equation is solved in three parts:
+
+## $N^\text{up}$
+$$
+\begin{aligned}
+N^\text{up}(\text{9:01}, x_2) &=
+N\!\left(\text{9:01} - \frac{x_2 - x_1}{w_f}, x_1 \right) \\
+&= N\!\left(\text{9:01} - \frac{`r dx`~\text{km}}{`r wf`~\text{km/h}}, x_1 \right) \\
+&= N\!\left(\text{9:01}-\text{0:02} = \text{8:59}, x_1 \right)\\
+\text{(a)}\qquad\qquad\qquad &= 2012.
+\end{aligned}
+$$
+
+## $N^\text{Q}$
+$$
+\begin{aligned}
+N^\text{Q}(\text{9:01}, x_2) &=
+N(\text{9:00}, x_2) + q_m\Delta t\\
+&= 2005 + 2160~\text{vph}\times\frac{1~\text{hr}}{60~\text{min}}\\
+&= 2005 + 36\\
+\text{(b)}\qquad\qquad\qquad &= 2041.
+\end{aligned}
+$$
+
+## $N^\text{dn}$
+
+Note that $N^\text{dn}(\text{9:01}, x_2) = N\left(t - \frac{x_3-x_2}{w_b},x_2 \right) + K_2(x_3-x_2)$.
+
+$$
+\begin{aligned}
+K_2(x_3-x_2) &= K\times 3~\text{km}\\
+&= 150\times 3\\
+\text{(c)}\qquad\qquad\qquad&= 450.
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+N\left(t - \frac{x_3-x_2}{w_b},x_2 \right)
+&= N\!\left(\text{9:01} - \frac{`r dx`~\text{km}}{`r wb`~\text{km/h}}, x_3 \right)  \\
+&= N\!\left(\text{9:01}-\text{0:09} = \text{8:52}, x_3 \right)\\
+\text{(d)}\qquad\qquad\qquad&= 1560.
+\end{aligned}
+$$
+
+$N^\text{dn}(\text{9:01}, x_2)$ is therefore equal to $450 + 1560 = 2010$.
+
+## $N_2$
+
+$N(\text{9:01},x_2)$ is then the minimum of $N^\text{up} = 2012$, $N^\text{Q} = 2041$, and $N^\text{dn} = 2010$, which is 2010.
+Therefore, (e) $N(\text{9:01},x_2) = 2010$.
