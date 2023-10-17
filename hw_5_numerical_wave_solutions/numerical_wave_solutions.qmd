@@ -47,36 +47,115 @@ off3 <- 2
 
 nt2x2 = (n[1] + n[3])/2 - (dv[1] - dv[2])/2 + (-off3 + 0)/2
 kt2x2 = nt2x2/seglen*1000 #veh/km
+
+gspeed <- function(k) {96*(1-k/120)}
+densspeed <- gspeed(kt2x2)
+qt2x2 <- densspeed*kt2x2
 ```
 
 @fig-kronos depicts a roadway segment divided into 3 `r seglen`-meter links ($x_1,\ x_2,\ x_3$).
 The storage on each link at time step $t_1$ are `r write_vec(n)` vehicles respectively.
 In the next time step $t_2$ (with a step size of $\Delta t = `r t`$ seconds), `r dv[1]` vehicles move from link $x_1$ to $x_2$, and `r dv[2]` vehicles move from $x_2$ to $x_3$.
-Additionally, `r on2` vehicles enter link $x_2$ via an on-ramp and `r off3` vehicles exit $x_3$ via an off-ramp.
+Additionally, `r on2` vehicle enters link $x_2$ via an on-ramp and `r off3` vehicles exit $x_3$ via an off-ramp.
 
 ![Depiction of road segment with volumes and vehicle movements.](kronos.png){#fig-kronos}
 
-The KRONOS model gives the vehicle storage on each link $n(t_i,x_j)$ for each time step $t_i$ and link $x_j$ as:
-
+The KRONOS model gives the vehicle storage on each link $n(t_i,x_j)$ for each time step $t_i$ and link $x_j$ as
 $$
-n(t_i,x_j) = \frac{n(t_{i-1}, x_{j+1}) + n(t_{i-1}, x_{j-1})}{2} -
-\frac{\Delta tq(t_{i-1}, x_{j+1}) + \Delta tq(t_{i-1}, x_{j-1})}{2} +
-\frac{\Delta tg(t_{i-1}, x_{j+1}) + \Delta tg(t_{i-1}, x_{j-1})}{2},
+\begin{aligned}
+n(t_i,x_j) &= \frac{n(t_{i-1}, x_{j+1}) + n(t_{i-1}, x_{j-1})}{2} \\
+&- \frac{\Delta tq(t_{i-1}, x_{j+1}) + \Delta tq(t_{i-1}, x_{j-1})}{2}\\
+&+ \frac{\Delta tg(t_{i-1}, x_{j+1}) + \Delta tg(t_{i-1}, x_{j-1})}{2},
+\end{aligned}
 $$
-
 where $q(t_i,x_j)$ is the flow rate and $g(t_i,x_j)$ is the difference in on- and off-ramp flow on link $x_j$ at time $t_i$.
 
-In our case, the vehicle movement counts are given directly, so the storage on link $x_2$ at time $t_2$ ($n(t_1,x_2)$) is:
-
+In our case, the vehicle movement counts are given directly, so the storage on link $x_2$ at time $t_2$ ($n(t_2,x_2)$) is:
 $$
 n(t_2,x_2) = \frac{`r n[1]` + `r n[3]`}{2} -
-\frac{`r dv[1]` + `r -dv[2]`}{2} +
+\frac{`r -dv[1]` + `r dv[2]`}{2} +
 \frac{`r -off3` + 0}{2},
 $$
-
 which gives (a) $n(t_2,x_2) = `r nt2x2`$ vehicles.
-The density in link 2 at this point is therefore (b) $k = \frac{n}{\Delta x} = `r kt2x2`$ vehicles per kilometer.
+The density in link 2 at this point is therefore (b) $k = \frac{n}{\Delta x} = `r kt2x2 %>% round(1)`$ vehicles per kilometer.
 
+The speed on this link is given by a Greenshields model where free-flow speed $v_f = 96$ kph and jam density $K = 120$ vehicles per kilometer, i.e.:
+$$
+\begin{aligned}
+v(k) &= v_f \left( 1 - \frac{k}{K} \right) \\
+&= 96 \left( 1 - \frac{k}{120} \right).
+\end{aligned}
+$$
+
+For a density of `r kt2x2 %>% round(1)` veh/km, this gives an equilibrium speed of (c) `r densspeed %>% round()` kph.
+Since $q = k\times v$, this gives a flow of (d) `r qt2x2 %>% round(1)` vph.
+
+{{< pagebreak >}}
 
 # 9.3
+
+```{r}
+len <- 150 #meters
+dt <- 5 #seconds
+n <- c(4,4,5)
+dx2x3 <- 2
+
+wf <- 108 #kph
+qm <- 2160 #vph
+K <- 138 #v/km
+wb <- 20 #kph
+gammactm <- function(vn) {
+  pmin(lag(vn), qm*dt, wb/wf*(K*len-vn))
+}
+qctm <- function(k) {pmin(wf*k, qm, (K-k)*wb)}
+
+n2 <- n[2] + gammactm(n)[2] - dx2x3
+k2 <- n2/len*1000 #v/km
+q2 <- qctm(k2)
+v2 <- q2/k2
+```
+
+@fig-ctm-links shows a highway segment with 3 `r len`-meter links and their associated storage in time step $t_1$.
+In the next time step ($\Delta t = `r dt`$s) `r dx2x3` vehicles move from link $x_2$ to $x_3$.
+Additionally, @fig-ctm-plot shows the flow-density relationship of the segment which applies to each link.
+This relationship is given by the equation
+$$
+q(k) = \min \left\{w_f\times k, q_m, (K-k)\times w_b\right\},
+$$ {#eq-qctm}
+where $q_m$, $w_f$, $w_b$, and $K$ are given as in @fig-ctm-plot.
+
+![Depiction of highway segment with link storage and movements.](ctm-links.png){#fig-ctm-links}
+
+![Flow-density relationship of links in @fig-ctm-links.](ctm-plot.png){#fig-ctm-plot}
+
+The Cell Transmission Model gives the following equation for storage in a cell:
+$$
+n_j(t_i) = n_j(t_{i-1}) + \gamma_j(t_i) - \gamma_{j+1}(t_i),
+$$
+where $n_j(t_i)$ is the number of vehicles on link $x_j$ at time $t_i$, and
+$$
+\gamma_j(t_i) = \min \left\{
+n_{j-1}(t_{i-1}),
+q_m \Delta t,
+\frac{w_b}{w_f}(K\Delta x - n_j(t_i-1))
+\right\},
+$$
+where $q_m$, $w_f$, and $w_b$ are given as shown in @fig-ctm-plot.
+
+Because $\gamma_{j+1}(t_i)$ is the flow out of $x_j$ and into $x_{j+1}$ for time step $t_i$, and `r dx2x3` vehicles travel from $x_2$ to $x_3$ in time step $t_2$, $\gamma_3(t_2)$ must equal `r dx2x3`.
+Therefore,
+$$
+\begin{aligned}
+n_2(t_2) &= n_2(t_1) + \gamma_2(t_2) - `r dx2x3`\\
+n_2(t_2) &= `r n[2]` + `r gammactm(n)[2]` - `r dx2x3`\\
+\text{(a)}\qquad n_2(t_2) &= `r n2`.
+\end{aligned}
+$$
+
+The density $k_2(t_2)$ is then (b) $k_2(t_2) = \frac{n_2(t_2)}{\Delta x} = `r k2 %>% round(1)`$ vehicles per kilometer.
+From @eq-qctm the flow is (d) $q_2(t_2) = `r q2 %>% round()`$ vph.
+The speed on this link is then:
+$$
+\text{(c)}\qquad v_2(t_2) = \frac{q_2(t_2)}{k_2(t_2)} = \frac{`r q2`}{`r k2`} = `r v2 %>% round(1)`\,\text{kph}.
+$$
 
