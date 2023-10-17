@@ -1,0 +1,41 @@
+---
+title: "Homework: Queueing Theory"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+library(queueing)
+```
+
+# 1
+
+A deterministic queueing theory is one in which constant behavior is assumed.
+For example, an arrival rate of 60 individuals per hour in a deterministic theory means that each minute exactly one individual will arrive.
+A stochastic theory, on the other hand, involves an element of randomness, i.e. there is a distribution which behavior follows. There will be e.g. an *average* arrival rate, but the exact arrival times are somewhat random.
+
+# 2
+
+```{r}
+#| label: setup-2
+
+arrival <- 100 #vph
+service_time <- 20 #sec/veh
+service_rate <- 3600/service_time #vph per station
+
+wage <- 25 #$/hr
+vot <- 10 #$/hr
+```
+
+A freeway on-ramp has a toll booth which takes `r service_time` seconds to service a vehicle, for a capacity rate of `r service_rate` vehicles per hour.
+The peak period flow on this on-ramp is `r arrival` vehicles per hour.
