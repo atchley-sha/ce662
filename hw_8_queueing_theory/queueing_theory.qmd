@@ -16,6 +16,21 @@ format: pdf
 library(tidyverse)
 library(kableExtra)
 library(queueing)
+
+write_vec <- function(v){
+  res <- case_when(
+    length(v) < 1 ~ "NULL",
+    length(v) == 1 ~ as.character(v),
+    length(v) == 2 ~ paste(v[1], "and", v[2]),
+    length(v) > 2 ~ paste(
+      paste(v[1:(length(v)-1)], collapse = ", "),
+      v[length(v)],
+      sep = ", and "
+    )
+  )
+  
+  res[1]
+}
 ```
 
 # 1
@@ -39,3 +54,18 @@ vot <- 10 #$/hr
 
 A freeway on-ramp has a toll booth which takes `r service_time` seconds to service a vehicle, for a capacity rate of `r service_rate` vehicles per hour.
 The peak period flow on this on-ramp is `r arrival` vehicles per hour.
+
+```{r}
+#| label: one-booth
+
+mm1 <- NewInput.MM1(arrival, service_rate, n = 10) %>% 
+  QueueingModel()
+
+p_less_3 <- sum(mm1$Pn[1:4])
+p_geq_3 <- 1 - p_less_3
+```
+
+Using the `queueing` R package gives the following values:
+The average number of vehicles in the system (including any vehicles being served) is `r mm1$L` and the average wait time (before being served) is `r mm1$Wq %>% round(4)` hours or `r mm1$Wq*3600` seconds.
+Additionally, the probability of a queue 3 vehicles long or longer $P(\geq 4)$ (note that the queue does not include any vehicles currently being served) is given by $1 - \sum_{n=0}^3 P(n)$.
+$P(0)$, $P(1)$, $P(2)$ and $P(3)$ are given by `r round(mm1$Pn[1:4],2) %>% write_vec()`, respectively, and so the probability of there being three or more vehicles in the queue is `r p_geq_3 %>% round(2)`.
