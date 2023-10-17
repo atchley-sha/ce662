@@ -7,6 +7,8 @@ number-sections: false
 execute: 
   echo: false
 format: pdf
+# include-in-header:
+#   text: \usepackage[document]{ragged2e}
 ---
 
 ```{r}
@@ -32,6 +34,8 @@ write_vec <- function(v){
   res[1]
 }
 ```
+
+<!-- \raggedright -->
 
 # 1
 
@@ -65,7 +69,29 @@ p_less_3 <- sum(mm1$Pn[1:4])
 p_geq_3 <- 1 - p_less_3
 ```
 
-Using the `queueing` R package gives the following values:
-The average number of vehicles in the system (including any vehicles being served) is `r mm1$L` and the average wait time (before being served) is `r mm1$Wq %>% round(4)` hours or `r mm1$Wq*3600` seconds.
+This system is modeled as an M/M/1 Markov model, and solving this gives the following:
+The average number of vehicles in the system (including any vehicles being served) is `r mm1$L` and the average wait time (before being served) is `r mm1$Wq %>% round(4)` hours or `r round(mm1$Wq*3600,1)` seconds.
 Additionally, the probability of a queue 3 vehicles long or longer $P(\geq 4)$ (note that the queue does not include any vehicles currently being served) is given by $1 - \sum_{n=0}^3 P(n)$.
 $P(0)$, $P(1)$, $P(2)$ and $P(3)$ are given by `r round(mm1$Pn[1:4],2) %>% write_vec()`, respectively, and so the probability of there being three or more vehicles in the queue is `r p_geq_3 %>% round(2)`.
+
+```{r}
+#| label: two-booths
+
+mmc <- NewInput.MMC(arrival, service_rate, 2, n = 10) %>% 
+  QueueingModel()
+
+p_less_3 <- sum(mmc$Pn[1:4])
+p_geq_3 <- 1 - p_less_3
+
+wait_diff <- mm1$Wq - mmc$Wq
+save_per_veh <- wait_diff*vot #$/veh
+save_per_hour <- save_per_veh*arrival #$/hr
+```
+
+An additional toll booth is being considered, and this proposed scenario is modeled with an M/M/c (or M/M/N) Markov model where $c=2$ (or $N=2$).
+Solving this model gives an individual expected wait time of `r (mmc$Wq*3600) %>% round(1)` seconds, which is `r (wait_diff*3600) %>% round(1)` seconds faster than the existing scenario.
+At a regional value of time of \$`r vot`/hr, this saves `r round(save_per_veh*100,1)`&cent; per vehicle.
+At an arrival rate of `r arrival` vehicles per hour, this saves \$`r round(save_per_hour,2)` per hour.
+Since the toll operator wage is \$`r wage`/hr, this additional toll booth does not make much economic sense.
+
+Additionally, the probability of three or more vehicles in the queue $P(\geq4)$ is calculated as above to give $P(\geq 4) = 1 - \sum_{n=0}^3{P(n)} = 1 - `r round(p_less_3,3)` = `r round(p_geq_3,3)`$.
