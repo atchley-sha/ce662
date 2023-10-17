@@ -1,0 +1,101 @@
+---
+title: "Homework: Simulation Theory"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+```
+
+# 1
+
+The following terms are given along with their definitions:
+- **System:** A subsection of reality which we want to understand
+- **Experiment:** A controlled test used to gain information about a system
+- **Model:** An abstraction of reality used to understand a system
+- **Simulation model:** A model that uses algorithms to determine behavior of individual units and their effects on each other, often including a time element
+- **Analytical model:** A model that uses mathematical equations to determine the state of the system given specific inputs
+
+# 2
+
+I would model a Sodalicious drive-thru after General Conference priesthood session with a simulation, because there is a lot of randomness in arrival and potentially departure rates. A simulation would also be useful to model "knock-on" effects of the increased demand, such as queues backing up to other roadways, etc.
+
+Water flowing through a hydraulic structure could be modeled analytically, as water generally behaves predictably and there is little randomness.
+
+The relationship between flow and density on a freeway segment could be modeled either analytically or with a simulation. Many such analytical models exist (such as Greenshield's), and depending on the use case predict traffic accurately enough. However, if more granular understanding is desired, a simulation may be better.
+
+# 3
+
+```{r}
+seed <- 89347856
+tot_iters <- 1000000
+```
+
+
+@eq-randu is a pseudorandom number generation algorithm which produces output values $X$ between 0 and 1.
+$$
+\begin{aligned}
+N_{i+1} &= (3945867 \times N_i) \mod 92348867 \\
+X_{i+1} &= \frac{N_i}{92348867}
+\end{aligned}
+$$ {#eq-randu}
+
+This algorithm is implemented in R as follows:
+```{r}
+#| label: randu-esque
+#| echo: true
+
+p1 <- 3945867
+p2 <- 92348867
+
+ni <- function(n, pmult = p1, pmodulo = p2) (pmult*n) %% pmodulo
+xi <- function(ni, pmodulo = p2) ni/pmodulo
+```
+
+Using a seed of `r seed`, the first few iterations of this algorithm give the following values:
+```{r}
+#| label: head-randu
+
+n <- seed
+iters <- 10
+
+for (i in 1:iters){
+  n[i+1] <- ni(n[i])
+}
+
+tibble(
+  iteration = 1:length(n),
+  n = n,
+  x = xi(n)
+) %>% 
+  kbl(align = "c") %>% 
+  kable_styling(latex_options = "HOLD_position")
+```
+
+To see if this algorithm is a good pseudorandom number generator, the algorithm is run for `r tot_iters` iterations, and @fig-hist shows a histogram of the results. This figure shows that the algorithm is fairly well distributed, though it is not perfect.
+
+```{r}
+#| label: fig-hist
+#| fig-cap: Histogram of the first 1,000,000 iterations of the algorithm in @eq-randu.
+
+n <- seed
+for (i in 1:tot_iters) n[i+1] <- ni(n[i])
+x <- xi(n) %>% 
+  as_tibble_col()
+
+ggplot(x) +
+  geom_histogram(aes(x = value), boundary = 0, fill = "lightblue", color = "black", bins = 30) +
+  xlim(0,1) +
+  labs(x = "X", y = "Frequency") +
+  theme_bw()
+```
