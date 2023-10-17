@@ -94,7 +94,7 @@ $$
 \begin{aligned}
 K_2(x_3-x_2) &= K\times 3~\text{km}\\
 &= 150\times 3\\
-\text{(c)}\qquad\qquad\qquad&= 450.
+\text{(c)}\qquad\qquad\qquad &= 450.
 \end{aligned}
 $$
 
