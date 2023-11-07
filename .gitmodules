@@ -1,3 +1,6 @@
 [submodule "matsim-example-project"]
 	path = matsim-example-project
 	url = https://github.com/atchley-sha/matsim-example-project
+[submodule "matsim-libs"]
+	path = matsim-libs
+	url = https://github.com/atchley-sha/matsim-libs
