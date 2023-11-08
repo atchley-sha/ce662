@@ -1,0 +1,130 @@
+---
+title: "Homework: MATSim"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+# include-in-header:
+#   text: \usepackage[document]{ragged2e}
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(scales)
+
+scores <- read_delim("scorestats.csv", delim = ";") 
+mode <- read_delim("modestats.csv", delim = ";")
+leg0 <- read_tsv("0.legHistogram.txt") %>% 
+  select(1, contains("car")) %>% 
+  rename_with(\(x) str_remove(x, "\\.+\\d"))
+leg100 <- read_tsv("100.legHistogram.txt") %>% 
+  select(1, contains("car")) %>% 
+  rename_with(\(x) str_remove(x, "\\.+\\d"))
+```
+
+
+I ran the example MATSim Sioux Falls scenario for 100 iterations.
+The following sections discuss some of the results of the simultaion run.
+
+# 1
+
+The average executed, average, worst, and best average scores are presented in @fig-avg-scores.
+As the number of iterations increases, all of these scores also increase, though not uniformly.
+There are a couple of "spikes" in all scores around iterations 12 and 19.
+Additionally, for all but the "worst average" score the rate of increase slows as the number of iterations increases.
+Interestingly, the "worst average" score seems to increase faster starting around iteration 50.
+The scenario is not really converged; the average score and worst score measures are still increasing.
+However, the model appears to be not too far off from convergence with the exception of the "worst average" score.
+
+```{r}
+#| label: fig-avg-scores
+#| fig-cap: Score statistics for Sioux Falls MATSim run.
+
+scores %>% 
+  pivot_longer(-iteration, names_to = "metric", values_to = "score") %>% 
+  mutate(
+    metric = case_match(
+      metric,
+      "avg_average" ~ "Average",
+      "avg_best" ~ "Best",
+      "avg_executed" ~ "Executed",
+      "avg_worst" ~ "Worst"
+    ) %>% 
+      factor(levels = c("Best", "Average", "Worst", "Executed"))
+  ) %>% 
+  ggplot() +
+  geom_line(aes(x = iteration, y = score, color = metric)) +
+  scale_x_continuous(breaks = seq(0,100,5), expand = expansion(add = c(0,2.5))) +
+  scale_y_continuous(breaks = seq(-30,30,10)) +
+  # scale_color_brewer(palette = "Set2") +
+  labs(x = "Iteration", y = "Score", color = "Average Score") +
+  theme_bw()
+```
+
+
+# 2
+
+The mode split over the iterations is shown in @fig-mode-split.
+As the simulation runs more iterations, more people are walking, and a few more are taking public transit.
+This is likely due to the observed road congestion in earlier iterations.
+Driving is the fastest mode at free-flow speed, but once the network is loaded with cars, driving becomes slower than other modes.
+
+```{r}
+#| label: fig-mode-split
+#| fig-cap: Mode split of the Sioux falls model for each iteration.
+
+mode %>% 
+  pivot_longer(-iteration, names_to = "mode", values_to = "share") %>% 
+  mutate(
+    mode = case_match(
+      mode,
+      "car" ~ "Car",
+      "pt" ~ "Public Transit",
+      "walk" ~ "Walk"
+    )
+  ) %>% 
+  ggplot() +
+  geom_line(aes(x = iteration, y = share, color = mode)) +
+  scale_x_continuous(breaks = seq(0,100,5), expand = expansion(add = c(0,2.5))) +
+  scale_y_continuous(breaks = seq(0,1,0.1), labels = label_percent(), expand = c(0,0.01)) +
+  labs(x = "Iteration", y = "Mode Share", color = "Mode") +
+  theme_bw()
+```
+
+
+# 3
+
+@fig-car-legs shows the car leg distribution for a simulation day for both iterations 0 and 100.
+In iteration 0, cars do not arrive nearly as quickly as they depart, resulting in tens of thousands of cars en route by the end of the simulation day.
+This is due to similar reasons to the changes in mode split across the iterations: nearly everyone drives in iteration 0, and fewer people drive in iteration 100.
+In iteration 0 the roads are extremely congested, and so vehicles are not able to reach their destinations.
+However, in iteration 100 this is not the case as there is less congestion.
+
+```{r}
+#| label: fig-car-legs
+#| fig-cap: Car leg distributions for iterations 0 and 100.
+
+bind_rows(
+  "0" = leg0,
+  "100" = leg100,
+  .id = "iteration"
+) %>% 
+  select(-stuck_car) %>% 
+  rename_with(\(x) str_remove(x, "_car")) %>% 
+  pivot_longer(-c(iteration, time), names_to = "type", values_to = "count") %>% 
+  mutate(type = str_to_sentence(type) %>% str_replace("-", " ")) %>% 
+  ggplot() +
+  geom_line(aes(x = time, y = count, color = type, lty = iteration)) +
+  scale_linetype_manual(values = c("0" = "32", "100" = "solid")) +
+  scale_y_continuous(trans = "sqrt", breaks = c(10000, 20000, 40000, 60000), labels = label_comma()) +
+  scale_x_time(labels = label_time("%H:%M"), breaks = breaks_width("6 hours"), expand = c(0,0)) +
+  labs(x = "Time", y = "Vehicles", lty = "Iteration", color = "Type") +
+  theme_bw()
+```
+
