@@ -1,0 +1,151 @@
+---
+title: "Homework: GM Car Following"
+subtitle: "14.2, 14.8"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+# 14.2
+
+General Motors has developed several car following models.
+Of these, GM5 is given as in @eq-gm5.
+
+$$
+\ddot x_i (t + \tau_i)
+= \alpha \frac{[\dot x_i(t + \tau_i)]^m}{[x_{i-1}(t) - x_i(t)]^l}
+\times [\dot x_{i-1}(t) - \dot x_i(t)]
+$$ {#eq-gm5}
+
+If $m = 0$ and $l = 1$, we can show that GM5 integrates to the Greenberg model (given by $v = v_m\ln(k_j/k)$):
+$$
+\begin{aligned}
+\ddot x_i (t + \tau_i)
+&= \alpha \frac{[\dot x_i(t + \tau_i)]^0}{[x_{i-1}(t) - x_i(t)]^1}
+\times [\dot x_{i-1}(t) - \dot x_i(t)] \\
+&= \alpha \frac{1}{x_{i-1}(t) - x_i(t)}
+\times [\dot x_{i-1}(t) - \dot x_i(t)] \\
+&= \alpha \frac{\dot x_{i-1}(t) - \dot x_i(t)}{x_{i-1}(t) - x_i(t)} \\
+&= \alpha \frac{\Delta \dot x}{\Delta x} \\
+\int \ddot x \ dt &=
+\alpha \int \frac{\dot x}{x} \ dt
+= \alpha \int \frac{dx/dt}{x}\ dt
+= \alpha \int \frac{dx}{x}.
+\end{aligned}
+$$
+Then, if $v$ is flow speed and $k = 1/x$ is vehicle density:
+$$
+\begin{aligned}
+\int \ddot x \ dt
+&= \alpha \int \frac{dx}{x} \\
+v &= \alpha\ln\left(\frac{1}{k}\right) + C.
+\end{aligned}
+$$
+If $v = 0$, then $k = k_j$, the jam density:
+$$
+\begin{aligned}
+0 &= \alpha \ln \left(\frac{1}{k_j}\right) + C \\
+C &= -\alpha \ln \left(\frac{1}{k_j}\right) \\
+C &= \alpha\ln(k_j).
+\end{aligned}
+$$
+This then gives us
+$$
+\begin{aligned}
+v &= \alpha\ln\left(\frac{1}{k}\right) + \alpha\ln(k_j) \\
+&= \alpha\ln\left(\frac{k_j}{k}\right).
+\end{aligned}
+$$ {#eq-alpha} 
+
+In order to find $\alpha$, we must first derive the flow-density equation from @eq-alpha:
+$$
+q = kv = k\alpha\ln\left(\frac{k_j}{k}\right).
+$$
+$q_m$, the maximum flow rate, is found by maximizing this equation with respect to $k$ (with $k_m$ equal to the density at $q_m$):
+$$
+\begin{aligned}
+\frac{dq}{dk} = 0 &= \frac{d}{dk}\left[k\alpha\ln\left(\frac{k_j}{k}\right)\right] \\
+0 &= \alpha \frac{d}{dk}[k\times(\ln k_j - \ln k)] \\
+0 &= \alpha\left[\ln\left(\frac{k_j}{k_m}\right) + k_m\frac{-1}{k_m}\right]
+= \alpha\left[\ln\left(\frac{k_j}{k_m}\right) - 1\right].
+\end{aligned}
+$$
+Assuming $\alpha \neq 0$:
+$$
+\begin{aligned}
+0 &= \ln\left(\frac{k_j}{k_m}\right) - 1 \\
+1 &= \ln\left(\frac{k_j}{k_m}\right) \\
+k_m &= \frac{k_j}{e}.
+\end{aligned}
+$$
+
+Defining $v_m$ as the speed at $q_m$, the above and @eq-alpha gives us:
+$$
+\begin{aligned}
+v_m &= \alpha\ln\left(\frac{k_j}{k_m}\right) \\
+v_m &= \alpha\ln\left(\frac{k_j}{k_j/e}\right) \\
+v_m &= \alpha.
+\end{aligned}
+$$
+
+Then:
+$$
+v = v_m\ln\left(\frac{k_j}{k}\right),
+$$
+which is the Greenberg model.
+
+# 14.8
+
+## a
+
+Using GM1 ($\ddot x(t + \tau_i) = \alpha[\dot x_{i-1}(t) - \dot x_i(t)]$), with $\alpha = 0.51\ \text{s}^{-1}$, $\dot x_{i-1}(t) = 72\ \text{kph} = 20\ \text{m}/\text{s}$, $\dot x_i(t) = 108\ \text{kph} = 30\ \text{m}/\text{s}$, and $\tau_i = 1.5\ \text{s}$, the acceleration that driver $i$ will adopt after a perception-reaction time is:
+$$
+\begin{aligned}
+\ddot x(t + 1.5) &= \frac{0.51}{\text{s}}[30 - 20]\ \text{m}/\text{s} \\
+&= -5.1 \text{m}/\text{s}^2.
+\end{aligned}
+$$
+
+
+## b (and c)
+Using GM2 ($\ddot x(t + \tau_i) = \begin{pmatrix}\alpha_1 \\ \alpha_2\end{pmatrix}[\dot x_{i-1}(t) - \dot x_i(t)]$), with $\alpha = 0.74$ gives:
+$$
+\begin{aligned}
+\ddot x(t + 1.5) &= \frac{0.74}{\text{s}}[30 - 20]\ \text{m}/\text{s} \\
+&= -7.4 \text{m}/\text{s}^2.
+\end{aligned}
+$$
+
+## d
+
+Using GM3, with vehicle length $l_{i-1} = l_i = 6\ \text{m}$, vehicle spacing (front bumper to front bumper) $s_i = 40\ \text{m}$, and therefore $x_{i-1}(t) - x_i(t) = 40 - 6 = 34\ \text{m}$, and $\alpha = 10\ \text{m}/\text{s}$:
+$$
+\begin{aligned}
+\ddot x(t + 1.5) &= 10\frac{-10\ \text{m/s}}{34\ \text{m}} \\
+&= -2.94\ \text{m/s}^2
+\end{aligned}
+$$
+
+## e
+
+GM4, with $\alpha = 0.5$:
+$$
+\begin{aligned}
+\ddot x_i(t + 1.5) &= 0.5\times\frac{30\times(20-30)}{34} \\
+&= -4.41\ \text{m/s}^2
+\end{aligned}
+$$
+
+## f
+
+GM5, with $\alpha = 0.5$, $l = 2$, and $m = 2$:
+$$
+\begin{aligned}
+\ddot x_i(t + 1.5) &= 0.5\times\frac{30^2\times(20-30)}{34^2} \\
+&= -3.89\ \text{m/s}^2
+\end{aligned}
+$$

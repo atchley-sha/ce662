@@ -1,0 +1,178 @@
+---
+title: "Homework: Discrete Event Simulation"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+
+library(kableExtra)
+library(simmer)
+library(tidyverse)
+library(simmer.plot)
+# library(tidyquant)
+
+write_vec <- function(v){
+  res <- case_when(
+    length(v) < 1 ~ "NULL",
+    length(v) == 1 ~ as.character(v),
+    length(v) == 2 ~ paste(v[1], "and", v[2]),
+    length(v) > 2 ~ paste(
+      paste(v[1:(length(v)-1)], collapse = ", "),
+      v[length(v)],
+      sep = ", and "
+    )
+  )
+  
+  res[1]
+}
+
+arrival <- 100 #vph
+arrival_h <- 3600/100 # sec/veh
+service_time <- 20 #sec/veh
+service_rate <- 3600/service_time #vph per station
+
+wage <- 25 #$/hr
+vot <- 10 #$/hr
+
+vehicle_path <- trajectory("vehicle_path") %>% 
+  seize("booth") %>% 
+  timeout(\() rexp(1, 1/service_time)) %>% 
+  release("booth")
+
+sim_time <- 3600 #seconds
+iters <- 100
+startup_time <- 100 #seconds
+```
+
+The previous homework questions involved a freeway on-ramp with a tool booth.
+This were modeled using both M/M/1 and M/M/c (or M/M/N) models, but here are simulated directly using the `simmer` R package.
+A vehicle arrives at the on-ramp, possibly joins a queue, is serviced by the toll booth, and exits the system.
+The average vehicle arrival rate at this on-ramp is `r arrival` vehicles per hour, or an average of `r arrival_h %>% round(1)` seconds between each arriving vehicle.
+Each toll booth can service a vehicle in on average `r service_time` seconds.
+
+In order for these results to be comparable to M/M simulations, the arrival and service rates use an exponential distribution where the probability density function $f(x)$ is given by
+$$
+f(x) = \lambda e^{-\lambda x}.
+$$
+`r iters` iterations of each (1-hour) simulation are run, and the values presented here are calculated across all iterations.
+Additionally, there is a "start-up" time before the system reaches a loaded state.
+No data from before this time will be used.
+Based on @fig-startup, this time is chosen to be `r startup_time` seconds.
+
+```{r}
+#| label: simmer
+
+on_ramp <- function(num_booths, traj = vehicle_path, rate = 1/arrival_h, time = sim_time){
+  map(
+    num_booths,
+    function(x){
+      simmer(paste(x, "booth")) %>% 
+        add_resource("booth", x) %>% 
+        add_generator("vehicle", traj, \() rexp(1, rate)) %>% 
+        run(time)
+    }
+  )
+}
+
+one_booth <- map(1:iters, \(i) on_ramp(1))
+two_booth <- map(1:iters, \(i) on_ramp(2))
+
+arrivals <- bind_rows(
+  one_booth %>% get_mon_arrivals() %>% mutate(booths = 1),
+  two_booth %>% get_mon_arrivals() %>% mutate(booths = 2)
+) %>% 
+  relocate(booths) %>% 
+  mutate(wait_time = end_time - start_time - activity_time)
+
+resources <- bind_rows(
+  one_booth %>% get_mon_resources() %>% mutate(booths = 1),
+  two_booth %>% get_mon_resources() %>% mutate(booths = 2)
+) %>% 
+  relocate(booths) %>% 
+  mutate(
+    difftime = time - lag(time),
+    difftime = ifelse(difftime < 0, startup_time, difftime),
+    difftime = ifelse(is.na(difftime), startup_time, difftime))
+```
+
+```{r}
+#| label: fig-startup
+#| fig-cap: Number of vehicles in the one-booth simulation. The "start-up" time is shown, and no data will be used from before this time.
+#| warning: false
+
+
+one_booth %>% 
+  get_mon_resources() %>% 
+  plot(item = "system") +
+  xlim(0,500) +
+  geom_vline(aes(xintercept = startup_time), lty = "dashed") +
+  theme_bw() +
+  labs(title = NULL, x = "Time (s)", y = "Vehicles in system") +
+  theme(
+    legend.position = "none",
+    strip.background = element_blank(),
+    strip.text = element_blank()
+  )
+```
+
+```{r}
+#| label: simmer-results
+#| include: false
+
+avg_veh <- resources %>% 
+  filter(time > startup_time) %>% 
+  group_by(booths) %>% 
+  summarise(avg_veh = weighted.mean(system, difftime))
+
+avg_wait <- arrivals %>% 
+  filter(start_time > startup_time) %>% 
+  group_by(booths) %>% 
+  summarise(avg_wait = mean(wait_time))
+
+queue_probs <- resources %>% 
+    filter(time > startup_time) %>% 
+    count(booths, queue, wt = difftime)
+
+queue_3_plus <- queue_probs %>% 
+  mutate(three_plus = ifelse(queue >= 3, TRUE, FALSE)) %>% 
+  group_by(booths, three_plus) %>% 
+  summarise(count = sum(n)) %>% 
+  mutate(pct = count/sum(count)) %>% 
+  ungroup() %>% 
+  filter(three_plus) %>% 
+  dplyr::select(booths, pct)
+
+results <- reduce(
+  list(avg_veh, avg_wait, queue_3_plus),
+  \(x,y) left_join(x, y, join_by(booths)))
+
+save_time <- results$avg_wait[1] - results$avg_wait[2]
+save_dollars <- save_time/3600*wage
+```
+
+The results for both the existing one-booth scenario and the proposed two-booth scenario are presented in @tbl-results.
+Note the average number of vehicles in the system is weighted by time, and includes vehicles currently being served.
+The average wait time is given per vehicle.
+The probability that there are 3 or more vehicles in the queue is calculated by taking the proportion of the simulation time across all iterations where the queue was three or more vehicles long.
+
+```{r}
+#| label: tbl-results
+#| tbl-cap: Selected Results of Simulation
+
+results %>% 
+  kbl(booktabs = TRUE, col.names = c("Toll booths", "Average vehicles in system", "Average wait time (s)", "$P(\\geq 3 \\text{ in queue})$"), escape = FALSE, digits = c(0,2,1,3), align = 'c') %>% 
+  kable_styling(latex_options = "hold_position")
+```
+
+The two-booth scenario saves `r save_time %>% round(1)` seconds per vehicle, and at a value of time of \$`r vot`/hr this is `r save_dollars %>% round(3) %>% {.*100}` &cent;/vehicle.
+At an average arrival rate of `r arrival` vehicles per hour, this saves \$`r round(save_dollars*arrival, 2)`/hr.
+Since the hourly wage is \$`r wage`/hr, the additional booth does not make much economic sense.
