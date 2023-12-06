@@ -1,0 +1,138 @@
+---
+title: "Homework: Intelligent Car Following"
+subtitle: "17.1, 17.3, 17.4"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+```
+
+# 17.1
+
+@fig-wiedemann gives a speed-distance relationship used by Wiedemann in his psychophysical model to determine the desired minimum following distance at a given speed.
+This question is based on this figure.
+
+![Desired minimum following distance based on speed in Wiedemann's psychophysical model.](wiedemann.png){#fig-wiedemann}
+
+## a
+
+The assumed nominal vehicle length (i.e. the spacing when traffic is jammed) is about 8 m, as this is the spacing at zero velocity in the figure.
+
+## b
+
+According to the middle curve, the desired minimum following distance at a speed of 30 m/s is just over 20 m.
+
+## c
+
+
+
+{{< pagebreak >}}
+
+# 17.3
+
+@tbl-speeds gives typical acceleration rates on level road in the CARSIM model.
+
+```{r}
+#| label: carsim
+
+carsim <- tibble(
+  min_speed_kph = c(0, 24, 48, 64, 80, 96),
+  max_speed_kph = lead(min_speed_kph),
+  label_kph = case_when(
+    is.na(min_speed_kph) ~ paste0("<", max_speed_kph),
+    is.na(max_speed_kph) ~ paste0(">", min_speed_kph),
+    TRUE ~ paste(min_speed_kph, max_speed_kph, sep = "\u2013")
+  ),
+  accel_mps2 = c(2.68, 1.68, 1.58, 1.27, 0.94, 0.64),
+  min_speed_ms = min_speed_kph*0.2778,
+  max_speed_ms = lead(min_speed_ms),
+) %>% 
+  mutate(
+    label_kph = paste(label_kph, "kph"),
+    mid_speed_ms = rowMeans(across(c(min_speed_ms, max_speed_ms))),
+    mid_speed_diff = mid_speed_ms - lag(mid_speed_ms),
+    mid_speed_ms = if_else(
+      is.na(mid_speed_ms),
+      lag(mid_speed_ms) + mean(mid_speed_diff, na.rm = TRUE),
+      mid_speed_ms),
+  ) %>% 
+  select(label_kph, mid_speed_ms, accel_mps2)
+```
+
+```{r}
+#| label: tbl-speeds
+#| tbl-cap: Typical Acceleration Rates on Level Road
+
+carsim %>% 
+  kbl(
+    booktabs = TRUE,
+    digits = c(0,1,2),
+    col.names = c("Speed Range", "Avg. Speed (m/s)", "Acceleration (m/s$^2$)"),
+    escape = FALSE,
+    align = 'c',
+    linesep = "") %>% 
+  kable_styling(latex_options = "hold_position")
+```
+
+@fig-accel-speed gives an acceleration-speed relationship used in Wiedemann's psychophysical model.
+The data from @tbl-speeds is also plotted on @fig-accel-speed for comparison.
+
+![Acceleration-speed relationship in Wiedemann's psychophysical model.](accel-speed2.png){#fig-accel-speed}
+
+The accelerations in CARSIM are much less than those in the psychophysical model.
+Additionally, the accelerations in CARSIM decline much more quickly at low speeds than higher speeds, though the relationship is roughly linear greater than about 15 m/s.
+
+{{< pagebreak >}}
+
+# 17.4
+
+The rule-based model developed by Kosonen is given below.
+Several rules exist to determine vehicle behavior, and are as follows (note that later rules supersede earlier ones):
+
+1. No Speed Change
+2. Accelerate if $\dot x_i < v_i$ and $t - t_\text{last} > T_\text{acc}(\dot x)$
+3. No Acceleration if $s_{ij} < s_\text{min}(\dot x_i, \dot x_j) + w_\text{stab}(\dot x_i, \dot x_j)$
+4. Slow Down if $s_{ij} < s_\text{min}(\dot x_i, \dot x_j)$
+5. Do Not Slow Down if $\dot x_i < \dot x_j$ or $t - t_\text{last} < T_\text{maxdec}$
+6. Goto Zero if $s_{ij} < 0$ (collision)
+
+where
+$\dot x_i$ is the current vehicle speed,
+$\dot x_j$ is the speed of the obstacle,
+$v_i$ is the desired speed,
+$t_\text{last}$ is the elapsed time from the last acceleration,
+$T_\text{acc}(\dot x)$ is the acceleration rate of the vehicle,
+$s_{ij}$ is the distance from the obstacle,
+$s_\text{min}(\dot x_i, \dot x_j)$ is the minimum safe distance,
+$w_\text{stab}(\dot x_i, \dot x_j)$ is the width of the stable area,
+and $T_\text{maxdec}$ is the maximum deceleration rate.
+
+Based on these rules, the following situations would resolve as follows:
+
+*A vehicle is entering an empty freeway at 60 kph which has a speed limit of 90 kph.*
+Rules 1 and 2 apply, and so the vehicle accelerates.
+
+*A vehicle is traveling on a freeway at the desired speed of 95 kph, with no vehicles in front.*
+Only rule 1 applies, so the vehicle does not change speed.
+
+*A 100-kph vehicle is approaching a 90-kph vehicle, with a spacing of 70 m and minimum safe distance 100 m.*
+Rules 1, possibly 2 depending on desired speed, 3, and 4 apply, so the vehicle slows down.
+
+*A vehicle with a desired speed of 95 km/h is following its leader, both traveling at a speed 90 km/h with a spacing of 120 m.*
+*The minimum safe distance is 100 m, and the stable area is 25 m.*
+Rules 1, 2, and 3 apply, so the vehicle does not accelerate.
+
+*A vehicle at a speed of 70 km/h is changing to the target lane, where there is a leader traveling at a speed of 90 km/h.*
+*The spacing between the two vehicles is 70 m, and the minimum safe distance is 100 m.*
+Rules 1, possibly 2, 3, 4, and 5 apply, so the vehicle does not slow down.
