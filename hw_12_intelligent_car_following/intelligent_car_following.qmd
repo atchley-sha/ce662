@@ -33,10 +33,6 @@ The assumed nominal vehicle length (i.e. the spacing when traffic is jammed) is 
 
 According to the middle curve, the desired minimum following distance at a speed of 30 m/s is just over 20 m.
 
-## c
-
-
-
 {{< pagebreak >}}
 
 # 17.3
