@@ -22,7 +22,7 @@ The car I chose for this problem set is a 2005 Chevrolet Corvette C6 Z06.
 This is a 6-speed manual transmission car with a 427.8 in^3^ V8 engine.
 An example of this car is shown in @fig-car.
 
-![A 2005 Chevrolet Corvette racing at the Motor Speedway of the South in the 2005 Piston Cup final.](car.jpg){#fig-car}
+![A 2005 Chevrolet Corvette C6 Z06 racing at the Motor Speedway of the South in the 2005 Piston Cup final.](car.jpg){#fig-car}
 
 ```{r}
 #| label: data
@@ -42,7 +42,7 @@ tmaxr <- tmaxrpm*0.1047198 #rad/sec
 # 19.2
 
 The peak power of the C6 is `r pmaxhp` hp at `r pmaxrpm` rpm, and the peak torque is `r tmaxlbft` lb-ft at `r tmaxrpm` rpm.
-This is `r round(pmax)` watts at `r round(pmaxr)` radians/sec and `r round(tmax)` N$\cdot$m at `r round(tmaxr)` radians/sec, respectively.
+This is `r round(pmax, -3)` watts at `r round(pmaxr)` radians/sec and `r round(tmax)` N$\cdot$m at `r round(tmaxr)` radians/sec, respectively.
 
 ```{r}
 c1 <- pmax/pmaxr
