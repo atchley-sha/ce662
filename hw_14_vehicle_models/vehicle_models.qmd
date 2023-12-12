@@ -1,0 +1,111 @@
+---
+title: "Homework: Vehicle Models"
+subtitle: "20.1--20.6"
+author: Hayden Atchley
+date: today
+date-format: "D MMMM YYYY"
+number-sections: false
+execute: 
+  echo: false
+format: pdf
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(kableExtra)
+library(scales)
+```
+
+The car I chose for this problem set is a 2005 Chevrolet Corvette C6 Z06.
+This is a 6-speed manual transmission car with a 427.8 in^3^ V8 engine.
+An example of this car is shown in @fig-car.
+
+![A 2005 Chevrolet Corvette C6 Z06 racing at the Motor Speedway of the South in the 2005 Piston Cup final.](car.jpg){#fig-car}
+
+```{r}
+#| label: data
+
+pmaxhp <- 504 #hp
+pmaxrpm <- 6300 #rpm
+tmaxlbft <- 467 # lb-ft
+tmaxrpm <- 4800 #rpm
+
+pmax <- pmaxhp*745.7 # W
+pmaxr <- pmaxrpm*0.1047198 #rad/sec
+tmax <- tmaxlbft*1.3558 # N-m
+tmaxr <- tmaxrpm*0.1047198 #rad/sec
+
+g1r <- 2.66
+g2r <- 1.78
+g3r <- 1.30
+g4r <- 1
+g5r <- 0.74
+g6r <- 0.5
+gRr <- 2.90
+fdar <- 3.42
+
+ftire <- "P275/35ZR18"
+rtire <- "P325/30ZR19"
+
+ft <- (18/2*25.4 + 275*0.35)/1000
+rt <- (19/2*25.4 + 325*0.30)/1000
+
+wt <- 3132 #lb
+
+width <- 75.9 #in (no mirrors)
+height <- 49.0 #in (with or without tires?)
+```
+
+# 20.1
+
+The following are specifications for the vehicle:
+
+a. Final drive axle ratio: `r fdar`:1
+b. 1^st^ gear ratio: `r g1r`:1
+c. 6^th^ gear ratio: `r g6r`:1
+d. Tire specification: `r ftire` (front), `r rtire` (rear)
+e. Base curb weight: `r wt` lb
+
+# 20.2
+
+```{r}
+vs <- 30 #m/s
+Nf <- g6r*fdar
+
+find_omega <- function(v, N, r){
+  v * 30 * N / pi / r
+}
+
+num <- vs*30*Nf
+
+omega <- find_omega(vs, Nf, rt)
+```
+
+Given that the vehicle speed is related to engine speed as in @eq-speed-relation, where $r$ is the tire radius and $N_{\text{ft}}$ is the final transmission gear ratio, the vehicle cruising at `r vs` m/s in 6^th^ gear has an engine speed of $`r round(num,1)`/\pi r$ m/s (the final gear ratio is $`r g6r` \times `r fdar` = `r round(g6r*fdar,2)`$).
+
+$$
+v = \frac{\pi r}{30N_{\text{ft}}}\omega
+$$ {#eq-speed-relation}
+
+Since this is a rear-wheel drive car, the rear tire radius will be used for $r$.
+This is $19"/2 + 0.3 \times 325\ \text{mm} = `r round(rt,3)`$ m.
+The engine speed is therefore $`r round(num,1)`/`r round(rt,3)`\pi = `r round(omega)`$ rad/s.
+
+# 20.3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
