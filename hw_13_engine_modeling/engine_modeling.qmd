@@ -232,7 +232,7 @@ $$
     {32 \pi^2 A^2 k R_{\text{a}} T_0}
   \right)
   ^{\frac{k+1}{2(k-1)}}
-\right].
+\right]
 - \frac{1}{\omega} \alpha P_{\max} \text{e}^{\frac{\beta(\omega - \omega_{\text{p}})}{\omega_{\text{p}}}}.
 $$
 
