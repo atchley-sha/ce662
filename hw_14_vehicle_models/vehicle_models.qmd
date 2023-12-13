@@ -54,6 +54,7 @@ ft <- (18/2*25.4 + 275*0.35)/1000
 rt <- (19/2*25.4 + 325*0.30)/1000
 
 wt <- 3132 #lb
+W <- wt*0.4535924*9.81 #N
 
 width <- 75.9 #in (no mirrors)
 height <- 49.0 #in (with or without tires?)
@@ -67,7 +68,7 @@ a. Final drive axle ratio: `r fdar`:1
 b. 1^st^ gear ratio: `r g1r`:1
 c. 6^th^ gear ratio: `r g6r`:1
 d. Tire specification: `r ftire` (front), `r rtire` (rear)
-e. Base curb weight: `r wt` lb
+e. Base curb weight: `r wt` lb (`r label_comma()(round(W,-1))` N)
 
 # 20.2
 
@@ -96,16 +97,57 @@ The engine speed is therefore $`r round(num,1)`/`r round(rt,3)`\pi = `r round(om
 
 # 20.3
 
+```{r}
+gr <- g1r*fdar
+t <- tmax/2
+Fe <- gr*t*0.8/rt
+```
+
+At start-up, we are using 1^st^ gear ($N_{ft} = `r round(gr,1)`$) and are assuming half the maximum torque is available ($\Gamma = `r round(t)`$ N-m).
+Since $F_e = \frac{\Gamma N_{ft}\zeta}{r}$, with $\zeta = 80$%, $F_e = `r round(Fe)`$ N.
+
+# 20.4
+
+```{r}
+Cd <- 0.31
+Af <- 2.08
+speed <- 100 #kph
+v <- speed*0.27777778 #m/s
+rho <- 1.2
+
+Fd <- rho/2 * Cd * Af * v^2
+```
+
+The car has a drag coefficient of `r Cd` and a frontal area of `r Af` m^2^, and is traveling at `r speed` kph $=$ `r round(v,1)` m/s.
+With the density of air at `r rho` kg/m^3^, the force of drag is:
+$$
+F_d = \frac{\rho}{2}C_dA_fv^2 = \frac{`r rho`}{2} \times `r Cd` \times `r round(v,1)`^2 = `r round(Fd)`\ \text{N}.
+$$
+
+# 20.5
+
+```{r}
+g <- 0.05
+Fg <- g*W
+```
+
+If the vehicle is traveling up a hill with a 5% grade, the grade resistance is $F_g \approx WG = `r label_number()(round(W,-1))` \times 0.05 = `r round(Fg)`$ N.
+
+# 20.6
+
+```{r}
+Ft <- Fe - Fd - Fg
+m <- W/9.81
+a <- Ft/m
+```
+
+Assuming the vehicle is only subject to grade resistance and drag, the total force is the engine force minus the resistances ($F_t = F_e - F_d - F_g$).
+This force is `r round(Ft)` N.
+The mass of the vehicle is `r round(m)` kg, so the acceleration is $a = F_t/m = `r round(a,1)`$ m/s^2^.
 
 
 
 
 
 
-
-
-
-
-
-
-
+ 
